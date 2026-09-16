@@ -1,0 +1,39 @@
+// 캔버스를 누를 때마다 사인파의 주파수가 랜덤하게 바뀌고 스펙트럼 에너지 표시
+
+let osc, fft, myFreq = 440, minFreq = 200, maxFreq = 600;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+  osc.start();					// 오실레이터 시작
+  fft = new p5.FFT();				// p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  fft.analyze();						// ❶ 주파수 스펙트럼 분석
+  stroke(255, 0, 0);
+  for (let f = minFreq; f < maxFreq; f++) {
+    let energy = fft.getEnergy(f);			// ❷ 스펙트럼 에너지 구하기
+    let x = map(f, minFreq, maxFreq, 0, width);
+    let y = map(energy, 0, 255, height, 0);
+    line(x, height, x, y);				// 스펙트럼 에너지를 세로선으로 표시
+  }
+
+  stroke(255, 255, 0);
+  let f = map(myFreq, minFreq, maxFreq, 0, width);
+  line(f, 0, f, height);					// 중심 주파수를 세로선으로 표시
+
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('주파수: ' + int(myFreq) + 'Hz', 20, 40);
+}
+
+function canvasPressed() {				// 콜백함수
+  myFreq = random(minFreq, maxFreq);		// 랜덤 주파수 구하기
+  osc.freq(myFreq);					// 오실레이터의 주파수 설정
+}

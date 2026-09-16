@@ -1,0 +1,38 @@
+// 사운드 파일 신호 필터링 (1번키:LPF, 2번키:HPF, 3번키:BPF)
+
+let soundFile, myFilter, fft, d, str = 'lowpass';
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 200);
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+
+  myFilter = new p5.Filter();			// p5.Filter 객체(myFilter) 생성
+  myFilter.connect();				// myFilter 객체를 메인출력(→스피커)에 연결
+  myFilter.setType('lowpass');			// 필터 유형 설정
+  myFilter.process(soundFile);			// 필터링효과를 soundFile 객체로 출력
+  fft = new p5.FFT();				// 스펙트럼 표시를 위해 p5.FFT 객체(fft) 생성
+  
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);
+  let myFreq = map(x, 0, width, 100, 5000);	// 차단주파수: 100∼5000Hz
+  myFilter.freq(myFreq);			// 또는 myFilter.set(myFreq);
+  
+  let spectrum = fft.analyze();			// 주파수 영역의 스펙트럼 분석
+  stroke(255, 255, 0);
+  for (let i = 0; i < spectrum.length; i++) {	// 기본값: spectrum.length=1024
+    let x = map(i, 0, spectrum.length, 0, width);	// x: 주파수
+    let y = map(spectrum[i], 0, 255, height, 0);	// y: 진폭
+    line(x, height, x, y);				// 주파수 스펙트럼을 선으로 표시
+  }
+  d.html(str + ': ' + int(myFreq) + 'Hz');	// 텍스트 정보(필터유형, 차단주파수) 출력
+}

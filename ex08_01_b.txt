@@ -1,0 +1,24 @@
+// 회전운동하는 작은 원-2
+
+let theta = 0, radius = 100;
+
+function setup() {
+  createCanvas(300, 300);
+}
+
+function draw() {
+  background(0);
+  translate(width/2, height/2);
+  stroke(255);
+  noFill();
+  ellipse(0, 0, radius*2, radius*2);
+
+  let x = radius * cos(theta);
+  let y = radius * sin(theta);
+  line(0, 0, x, y);
+
+  fill(0, 255, 0);
+  ellipse(x, y, 20, 20);
+  
+  theta += 0.05;
+}

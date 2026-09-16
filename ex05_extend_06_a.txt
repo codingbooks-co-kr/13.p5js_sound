@@ -1,0 +1,36 @@
+// P5.Panner3D를 사용한 3차원 음원 위치 이동
+
+let soundFile, myPanner, d, angle = 0;
+
+function preload() {
+  soundFile = loadSound('data/piano.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 500, WEBGL);		// 3차원 렌더러 사용
+  myPanner = new p5.Panner3D();		// p5.Panner3D 객체(myPanner) 생성
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  soundFile.connect(myPanner);		// soundFile 객체를 myPanner 객체와 연결
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  let x = 200 * sin(angle);			// 회전운동의 x축값
+  let y = 200 * cos(angle);			// 회전운동의 y축값
+  let z = 0;
+  
+  push();					// ❶ 현재의 드로잉 스타일 설정
+  translate(x, y, z);				// 3차원 좌표 이동
+  fill(0, 255, 0);
+  sphere(50);					// 구 생성
+  pop();						// ❷ 원래의 설정(→원래의 좌표) 복구
+
+  myPanner.set(x, y, z);			// myPanner 객체의 x, y, z 좌표값 설정
+  angle += 0.01;
+  
+  d.html('positionX: ' + int(myPanner.positionX()) + '<br>positionY: ' + int(myPanner.positionY()) + '<br>positionZ: ' + int(myPanner.positionZ()));		// <br>은 “줄바꿈” 태그
+}

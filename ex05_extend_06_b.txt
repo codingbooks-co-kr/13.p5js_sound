@@ -1,0 +1,19 @@
+// translate()를 사용한 사각형 좌표 이동
+
+function setup() {
+  createCanvas(400, 300);
+}
+
+function draw() {	// 무한 반복
+  background(0); 
+  rect(0, 0, 100, 100);	// 원점 좌표: (0, 0)
+  
+  translate(50, 50);	// ❶좌표이동
+  rect(0, 0, 100, 100);
+  
+  translate(50, 50);	// ❷좌표이동 (누적)
+  rect(0, 0, 100, 100);
+
+  translate(50, 50);	// ❸좌표이동 (누적)
+  rect(0, 0, 100, 100);
+}

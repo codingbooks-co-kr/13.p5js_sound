@@ -1,0 +1,23 @@
+// 방법3❸: 캔버스를 눌렀다 뗄 때 오디오 활성화
+
+let soundFile;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');
+}
+
+function setup() {
+  let canvas = createCanvas(200, 100);
+  canvas.mousePressed(canvasPressed);
+  canvas.mouseReleased(userStartAudio);
+  background(0);
+  
+  // 오디오 자동 재생 제한 시뮬레이션
+  getAudioContext().suspend();
+  // 실행 초기 사운드 파일 자동 재생
+  soundFile.play();
+}
+
+function canvasPressed() {
+  console.log('캔버스 누름!');
+}

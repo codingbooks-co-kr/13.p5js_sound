@@ -1,0 +1,45 @@
+// p5.js: 마이크 음량값 송신
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let mic, level = 0;
+
+function setup() {
+  createCanvas(500, 500);
+  mic = new p5.AudioIn();		// p5.AudioIn 객체(mic) 생성
+  mic.start();				// 마이크 입력 시작
+
+  port.getPorts(); 			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton); 	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort); 	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent); 		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과
+  level = mic.getLevel();		// 마이크 음량(진폭: 0∼1) 반환
+  let myLevel = map(level, 0, 1, 10, 500);
+  noStroke();				// 원의 외곽선 제거 (부드러운 페이딩 효과)
+  fill(255, 255, 0);
+  ellipse(width/2, height/2, myLevel, myLevel);	// 마이크 음량에 따라 원 반지름 변화
+}
+
+function serialEvent() {				// 콜백함수: 수신값이 있으면 자동 호출
+  let signal = port.read(); 			// 수신 (통신시작신호('A'), 통신제어신호('B'))
+  let val = map(level, 0, 1, 0, 255);		// 마이크 음량 변환 범위: 1바이트(0∼255)
+  port.write(val);				// 송신 (마이크 음량값: 0∼255)
+}
+
+function makePortButton() {			// 포트 첫 연결 시 포트 선택 버튼 생성
+  let portButton = createButton('포트 선택'); 	// 버튼 생성
+  portButton.mousePressed(choosePort); 	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort(); 				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수
+  port.open().then(initiateSerial); 		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

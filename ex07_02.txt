@@ -1,0 +1,24 @@
+// 캔버스를 누를 때마다 미디번호 배열요소를 차례로 재생
+
+let monoSynth, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  background(0);
+  let myFreq = midiToFreq(sclaes[index]);	// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, 0, 0.3);		// 음 재생
+  text('미디번호: ' + sclaes[index], width/2, height/2);
+  index = (index + 1) % sclaes.length;	// index=0∼7 순서를 반복
+}

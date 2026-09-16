@@ -1,0 +1,23 @@
+// 특정 키로 두 개의 사운드 파일 재생 제어
+
+let soundFile1, soundFile2;
+
+function preload() {
+  soundFile1 = loadSound('data/piano.mp3'); 	// soundFile1 객체 생성 및 초기화(파일 로딩)
+  soundFile2 = loadSound('data/latin.mp3'); 	// soundFile2 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(400, 100); 
+  background(200);
+  textSize(20);
+  textAlign(CENTER, CENTER);
+  text('1번 또는 2번 키를 눌러 사운드 재생', width/2, height/2);
+}
+
+function keyPressed() {
+  soundFile1.stop();
+  soundFile2.stop();
+  if (key === '1') soundFile1.play();
+  if (key === '2') soundFile2.play();
+}

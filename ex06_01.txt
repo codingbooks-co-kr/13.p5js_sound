@@ -1,0 +1,31 @@
+// 캔버스를 누를 때마다 랜덤 주파수음 생성-1
+
+let osc, myFreq = 440;			// 440Hz(‘라’음: 국제표준음)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  osc = new p5.Oscillator();			// p5.Oscillator 객체(osc) 생성
+  osc.freq(myFreq);				// 오실레이터의 초기 주파수 설정
+  osc.setType('sine');				// 오실레이터의 유형 설정(기본값: 'sine')
+
+  textSize(20);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  fill(255, 255, 0);
+  text('캔버스를 누를 때마다 랜덤 주파수음 생성', width/2, height/2);
+  text(int(myFreq) + 'Hz', mouseX, mouseY);	// 오실레이터의 주파수 출력
+}
+
+function canvasPressed() {			// 콜백함수
+  osc.start();					// 오실레이터 시작
+}
+
+function mouseReleased() {
+  osc.stop();					// 오실레이터 정지
+  myFreq = random(200, 800);			// 랜덤 주파수 범위: 200Hz∼800Hz
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+}

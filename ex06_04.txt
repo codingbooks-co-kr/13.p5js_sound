@@ -1,0 +1,34 @@
+// 마우스를 상하로 움직여 주파수를 선택하고 마우스를 눌러 해당 주파수의 오실레이터 추가 생성
+
+let myFreq, oscArray = [];
+
+function setup() {
+  let canvas = createCanvas(500, 300);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+}
+
+function draw() {
+  background(0);
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('캔버스를 눌러 주파수 추가', 20, 30);
+  
+  let y = constrain(mouseY, 0, height);
+  myFreq = map(y, 0, height, 200, 500);	// 마우스 상하 움직임을 (200∼500)으로 변경 
+  text(myFreq + 'Hz', 20, y);
+  
+  stroke(255);
+  line(0, y, width, y);				// 마우스의 상하 움직임을 따라오는 선
+}
+
+function canvasPressed() {			// 콜백함수
+  let osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.amp(0.1);					// 오실레이터의 진폭 설정
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+  osc.start();					// 오실레이터 시작
+  
+  oscArray.push(osc);				// oscArray 배열에 osc 객체 추가
+  console.log(oscArray);
+  console.log('추가 주파수: ' + int(myFreq) + 'Hz');
+}

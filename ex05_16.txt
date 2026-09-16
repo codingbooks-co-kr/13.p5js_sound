@@ -1,0 +1,26 @@
+// 슬라이더를 좌우로 드래그하면 음원 위치도 따라서 이동
+
+let soundFile, slider;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 200);
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+
+  slider = createSlider(-1, 1, 0, 0.01);		// 슬라이더 생성(범위:-1∼1, 초깃값:0, 스텝:0.01)
+  slider.size(width);				// 슬라이더 크기 설정
+
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  let panValue = slider.value();			// 슬라이더 값 읽기
+  soundFile.pan(panValue);			// 사운드 파일의 스테레오 음원 위치 설정
+  fill(255);
+  text('팬: ' + nf(panValue, 1, 2), width/2, height/2);
+}

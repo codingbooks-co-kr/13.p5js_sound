@@ -1,0 +1,38 @@
+// 원이 좌우 경계에서 반사할 때마다 사운드 음원의 속도/음량/팬 랜덤 출력
+
+let soundFile, d, x = 0, velocity = 3, rateValue = 1, volumeValue = 0.5, panValue = 0;
+
+function preload() {
+  soundFile = loadSound('data/snare.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 200);
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과
+  noStroke();					// 외곽선 제거 (부드러운 페이딩 효과)
+  fill(255);
+  ellipse(x, height/2, 80, 80);
+  x += velocity;
+
+  if (x < 0 || x > width) {			// 캔버스의 좌우 경계에 부딪히는 경우
+    velocity *= -1;				// 이동 방향 반전
+  
+    rateValue = random(2);
+    soundFile.rate(rateValue);			// 재생 속도 설정(0∼2)
+    
+    volumeValue = random(1);
+    soundFile.setVolume(volumeValue);		// 재생 음량 설정(0∼1)
+    
+    panValue = map(x, 0, width, -1, 1);
+    soundFile.pan(panValue);			// 스테레오 음원 위치 설정(-1.0∼1.0)
+    
+    soundFile.play();				// 사운드 파일 재생
+  }
+  
+  d.html('속도=' + nf(rateValue, 1, 1) + ' 음량=' + nf(volumeValue, 1, 1) + ', 팬=' + nf(panValue, 1, 1));
+}

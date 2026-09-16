@@ -1,0 +1,22 @@
+// 원이 좌우 경계에서 반사할 때마다 짧은 음향효과음 재생
+
+let soundFile, x = 0, velocity = 3;
+
+function preload() {
+  soundFile = loadSound('data/clap.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(300, 200);
+}
+
+function draw() {
+  background(0, 10);		// 페이딩 효과
+  noStroke();			// 원의 외곽선 제거 (부드러운 페이딩 효과)
+  ellipse(x, height/2, 50, 50);
+  x += velocity;
+  if (x < 0 || x > width) {	// 좌우 경계를 넘어서는 경우 (경계 반사)
+    velocity *= -1;		// 반사: velocity 부호 변경 (x축 속도 성분이 증가 또는 감소)
+    soundFile.play();		// 사운드 파일 재생
+  }
+}

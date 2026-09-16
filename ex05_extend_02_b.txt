@@ -1,0 +1,19 @@
+// 방법2: 캔버스를 눌러 오디오 재생
+// 콜백함수: [질문5.3] 설명 참조
+
+let soundFile;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');
+}
+
+function setup() {
+  let canvas = createCanvas(200, 100);
+  canvas.mousePressed(canvasPressed);
+  background(0);
+}
+
+function canvasPressed() {	// 콜백함수
+  soundFile.playMode('restart');	// [질문5.4]
+  soundFile.play();		// 음재생
+}

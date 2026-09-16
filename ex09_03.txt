@@ -1,0 +1,33 @@
+// 사운드 파일 재생 시 주파수 스펙트럼 표시-1 (캔버스를 누를 때마다 재생/정지 토글)
+
+let soundFile, fft;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  soundFile.play();				// 사운드 파일 재생
+  fft = new p5.FFT();				// 스펙트럼 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  let spectrum = fft.analyze();				// 주파수 영역의 진폭값 배열 반환
+  stroke(0, 255, 0);
+  for (let i = 0; i < spectrum.length; i++) {		// 기본값: spectrum.length=1024
+    let x = map(i, 0, spectrum.length, 0, width);	// x: 주파수
+    let y = map(spectrum[i], 0, 255, height, 0);	// y: 진폭
+    line(x, height, x, y);				// 주파수 스펙트럼을 선으로 표시
+  }
+}
+
+function canvasPressed() {		// 콜백함수: 캔버스를 누를 때마다 재생/일시정지 토글
+  if (soundFile.isPlaying()) {		// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();			// 사운드 파일 재생 일시 정지
+  } else {				// 사운드가 재생되고 있지 않은 경우
+    soundFile.loop();			// 사운드 파일 무한 반복 재생
+  }
+}

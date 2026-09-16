@@ -1,0 +1,29 @@
+// 마이크 입력 신호의 시간 파형을 방사형으로 표시-1
+
+let mic, fft;
+
+function setup() {
+  createCanvas(500, 500);
+  mic = new p5.AudioIn();		// p5.AudioIn 객체(mic) 생성
+  mic.start();				// 마이크 입력 시작
+
+  fft = new p5.FFT();			// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+  fft.setInput(mic);			// fft 객체의 입력소스(→mic 객체) 설정
+}
+
+function draw() {
+  background(0);
+  let wave = fft.waveform();		// 시간 영역의 진폭값 배열 반환
+  stroke(0, 255, 0);			// 방사형 파형 선 색상
+  strokeWeight(3);			// 선 굵기 설정
+  noFill();				// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();				// 시간 파형(방사형) 그리기 시작
+  for (let i = 0; i < wave.length; i++) {		// 기본값: wave.length=1024
+    let theta = map(i, 0, wave.length, 0, TWO_PI);	// theta: 0∼2π
+    let r = map(wave[i], -1, 1, 0, width/2);		// r: 진폭(반지름)
+    let x = width/2 + r * cos(theta);			// 원주상의 x좌표
+    let y = height/2 + r * sin(theta);			// 원주상의 y좌표
+    vertex(x, y);					// 방사형 원주상의 꼭지점 좌표
+  }
+  endShape(CLOSE);			// 시간 파형 그리기 종료(시작과 끝 연결)
+}

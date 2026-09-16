@@ -1,0 +1,23 @@
+// 아두이노: 사운드 음량값 수신 후 LED 밝기 제어, 버튼값 송신
+
+#define BUTTON 2
+#define LED 6
+
+void setup() {
+  pinMode(BUTTON, INPUT);
+  pinMode(LED, OUTPUT);
+  Serial.begin(9600);
+  while (Serial.available() == 0) {	// 수신 버퍼에 수신값이 없는 동안 반복 실행
+    Serial.write('A');			// 시작신호('A') 전송
+    delay(300);     			// 0.3초 대기
+  }
+}
+
+void loop() { }
+
+void serialEvent() {    			// 이벤트함수: 수신값이 있으면 자동 호출
+  int value1 = Serial.read(); 		// 수신 (사운드음량값: 0∼255)
+  analogWrite(LED, value1);		// 수신값으로 LED 밝기 제어
+  int value2 = digitalRead(BUTTON);	// 버튼값 읽기
+  Serial.write(value2);			// 송신 (버튼값: 0 또는 1)
+}

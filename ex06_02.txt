@@ -1,0 +1,33 @@
+// 마우스를 좌우로 드래그하면 사인파의 진폭 변화
+
+let osc;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.freq(440);					// 오실레이터의 초기 주파수 설정(440Hz)
+
+  textSize(25);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);		// 마우스의 좌우 움직임 범위(0∼width) 제한
+  let myAmp = map(x, 0, width, 0, 1);	// 오실레이터의 변경된 진폭 범위: 0.0∼1.0
+  osc.amp(myAmp);				// 오실레이터의 진폭 설정
+
+  fill(255, 255, 0);
+  text('마우스를 눌러 좌우로 움직여 보세요', width/2, 80);
+  text('진폭: ' + nf(myAmp, 1, 2), width/2, 120);
+}
+
+function canvasPressed() {			// 콜백함수
+  osc.start();					// 오실레이터 시작
+}
+
+function mouseReleased() {			// 이벤트함수
+  osc.stop();					// 오실레이터 정지
+}

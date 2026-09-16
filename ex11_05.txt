@@ -1,0 +1,26 @@
+// 사운드 파일의 재생 시 주파수 스펙트럼의 방사형 표시 (HSB 컬러모드)
+
+let soundFile, fft;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 500);
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  fft = new p5.FFT();				// 스펙트럼 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  let spectrum = fft.analyze();			// 주파수 영역의 스펙트럼 분석
+  stroke(0, 255, 0);				// 방사형 선 색상 설정
+  for (let i = 0; i < spectrum.length; i++) {	// 기본값: spectrum.length=1024
+    let theta = map(i, 0, spectrum.length, 0, TWO_PI);	// theta: 0∼2π
+    let r = map(spectrum[i], 0, 255, 0, width/2);	// r: 진폭(반지름)
+    let x = width/2 + r * cos(theta);			// 원주상의 x좌표
+    let y = height/2 + r * sin(theta);			// 원주상의 y좌표
+    line(width/2, height/2, x, y);			// 방사형 선 그리기
+  }
+}

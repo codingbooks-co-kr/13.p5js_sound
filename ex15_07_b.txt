@@ -1,0 +1,86 @@
+// p5.js: 버튼값 2개 수신 후 회전형 파형 진폭선의 회전속도 제어, 진폭값 및 색상값 송신
+
+let port = new p5.WebSerial(); 		// 시리얼 통신 객체 생성
+let soundFile, myAmp, level, c, myColor =1, velocity = 0.01, theta = 0;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 500);
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  myAmp = new p5.Amplitude();		// p5.Amplitude 객체(myAmp) 생성
+  c = color(255, 255, 255);			// 회전형 진폭선 색상: 흰색
+
+  port.getPorts();			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton);	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort);	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent);		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+}
+
+function draw() {
+  // ❶ 회전형 검은색 선으로 이전값 지우기
+  let x = width/2 + width * cos(theta);
+  let y = height/2 + height * sin(theta);
+  stroke(0);
+  strokeWeight(5);
+  line(width/2, height/2, x, y);
+
+  // ❷ 회전형 진폭선으로 사운드 크기를 표시
+  level = myAmp.getLevel();			// 사운드 샘플 진폭값(0∼1) 구하기
+  let myLevel = map(level, 0, 0.5, 0, 500);	// 실제 사용된 진폭값 범위: 0∼0.5
+  x = width/2 + myLevel * cos(theta);	// 원주상의 x좌표
+  y = height/2 + myLevel * sin(theta);	// 원주상의 y좌표
+  stroke(c);					// 회전형 진폭선 색상
+  line(width/2, height/2, x, y);			// 회전형 진폭선 그리기
+
+  theta += velocity;				// 회전 속도
+  if (theta > TWO_PI) theta = 0;		// theta는 0∼2π 범위를 반복
+}
+
+function serialEvent() {			// 콜백함수: 수신값이 있으면 자동 호출
+  let str = port.readLine();		// 수신 (개행까지의 수신 문자열 읽기)
+  if (!str) return;			// 입력 문자열(→str)이 없으면 함수 빠져나가기
+  let s = trim(str);			// 입력 문자열(→str)의 시작과 끝에 붙은 공백 삭제
+  let val = split(s, ',');			// 콤마로 구분된 문자열을 val 배열에 저장
+  if (val.length === 2) {		// 배열의 크기가 두 개일 때
+    if (int(val[0]) === 0) velocity -= 0.001;	// 회전속도 감속
+    if (int(val[1]) === 0) velocity += 0.001;	// 회전속도 가속
+    velocity = constrain(velocity, 0.001, 0.1);	// 회전 가속도를 0.001∼0.1 범위로 제한 
+  }
+
+  let myLevel = map(level, 0, 0.5, 0, 255);	// 진폭값 변환 범위: 1바이트(0∼255)
+  port.write(myLevel + ',' + myColor + '\n');	// 송신 (문자열: '진폭값,색상값\n')
+}
+
+function keyPressed() {			// 이벤트함수 (키를 누를 때 자동 실행)
+  if (key === '1') {
+    c = color(255, 255, 255);		// White 
+    myColor = 1;			// 송신 색상값: 1
+  } else if (key === '2') {
+    c = color(255, 0, 0);		// Red
+    myColor = 2;			// 송신 색상값: 2
+  } else if (key === '3') {
+    c = color(0, 255, 0);		// Green
+    myColor = 3;			// 송신 색상값: 3
+  } else if (key === '4') {
+    c = color(0, 0, 255);		// Blue
+    myColor = 4;			// 송신 색상값: 4
+  }
+}
+
+function makePortButton() {			// 포트 첫 연결 시 포트 선택 버튼 생성
+  let portButton = createButton('포트 선택');	// 버튼 생성
+  portButton.mousePressed(choosePort);	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort();				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수
+  port.open().then(initiateSerial);		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

@@ -1,0 +1,20 @@
+// 캔버스를 누르면 짧은 미디음 재생 (미디번호 60은 “C4”, 4옥타브의 “도”음, 주파수로 262Hz)
+
+let monoSynth;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성
+  
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  let myFreq = midiToFreq(60);		// 미디번호(60)를 주파수(262Hz)로 변환
+  monoSynth.play(myFreq, 1, 0, 0.3);		// 미디음 재생
+}

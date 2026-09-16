@@ -1,0 +1,56 @@
+// K-Means Clustering-1
+// 마우스를 누른 위치에 생성된 원들의 자동 군집화
+
+let kmeans, data = [], numCluster = 3, cluster = false;
+
+function setup() {
+  let canvas = createCanvas(500, 500);
+  canvas.mousePressed(canvasPressed);	// ❶캔버스를 누르면 canvasPressed() 호출
+  
+  let button = createButton('Clustering'); 	// 버튼 생성 (버튼 레이블은 'Clustering')
+  button.size(120, 50);				// 버튼 크기 설정
+  button.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button.mousePressed(getCluster);		// ❸버튼 누르면 getCluster() 자동 호출
+
+  background(0);
+  colorMode(HSB);				// HSB 컬러모드
+}
+
+function draw() {
+  if (cluster) {						// ❼cluster가 true인 경우 실행
+    for (i = 0; i < kmeans.dataset.length; i++) {	// 입력데이터(→원)의 개수만큼 반복
+      let centroid = kmeans.dataset[i].centroid;	// 세 그룹일 때 centroid = 0,1,2
+      let datapointX = kmeans.dataset[i][0];		// 데이터(원)의 x좌표
+      let datapointY = kmeans.dataset[i][1];		// 데이터(원)의 y좌표
+
+      let h = map(centroid+1, 1, numCluster, 0, 240);
+      fill(h, 100, 100);					// HSB 중 S(채도)와 B(밝기)는 100%
+      ellipse(datapointX, datapointY, 35, 35);		// 데이터를 원으로 표시
+
+      fill(0);
+      textAlign(CENTER, CENTER);
+      text(centroid+1, datapointX, datapointY);		// 각 원형 데이터의 centroid 표시
+    }
+  }
+}
+
+function canvasPressed() {				// ❷콜백함수: 캔버스 누를 때 호출
+  let inputs = { x: mouseX, y: mouseY };		// 입력 데이터 객체(inputs) 생성
+  data.push(inputs);					// data 배열에 inputs 객체 추가
+  fill(255);
+  ellipse(mouseX, mouseY, 35, 35);			// 입력 데이터를 원으로 표시
+}
+
+function getCluster() {					// ❹콜백함수: 버튼 누를 때 호출
+  let options = {					// 옵션 객체(options) 생성
+    k: numCluster,					// 클러스터 수
+    maxIter: 1200,					// 수렴하기 전 최대 반복 횟수
+    threshold: 0.9					// 수렴하기 전 문턱값
+  };
+  kmeans = ml5.kmeans(data, options, clustering);	// ❺객체 생성 및 clustering() 호출
+  //console.log(kmeans);				// 객체(kmeans) 정보를 콘솔창에 표시
+}
+
+function clustering() {					// ❻콜백함수: 객체 생성 시 호출
+  cluster = true;
+}

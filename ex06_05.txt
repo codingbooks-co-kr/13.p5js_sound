@@ -1,0 +1,39 @@
+// 캔버스를 누를 때마다 랜덤 주파수의 오실레이터 세 개 생성
+
+let oscArray = [], oscNum = 3, minFreq = 200, maxFreq = 500;
+
+function setup() {
+  let canvas = createCanvas(500, 300);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  for (let i = 0; i < oscNum; i++) {
+    let myFreq = random(minFreq, maxFreq);
+    let osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+    osc.freq(myFreq);				// 오실레이터의 주파수 설정
+    osc.amp(1.0 / oscNum);			// 오실레이터의 진폭 설정
+    osc.start();					// 오실레이터 시작
+    oscArray.push(osc);				// oscArray 배열에 osc 객체 추가
+  }
+}
+
+function draw() {
+  background(0);
+  for (let i = 0; i < oscNum; i++) {
+    let myFreq = oscArray[i].f;		// f 속성: 오실레이터의 주파수 
+    let y = map(myFreq, minFreq, maxFreq, 0, height);
+    
+    stroke(255);
+    line(0, y, width, y);		// 마우스의 상하 움직임을 따라오는 선
+    
+    noStroke();
+    fill(255);
+    text(int(myFreq) + 'Hz', 10*(i*5), y+10);
+  }
+}
+
+function canvasPressed() {		// 콜백함수
+  for (let i = 0; i < oscNum; i++) {
+    let myFreq = random(minFreq, maxFreq);
+    oscArray[i].freq(myFreq);		// 오실레이터 객체 배열요소의 주파수 변경
+  }
+}

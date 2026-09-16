@@ -1,0 +1,26 @@
+// 캔버스를 눌러 미디번호 배열요소 순차 재생
+
+let polySynth;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  polySynth = new p5.PolySynth();		// p5.PolySynth 객체(polySynth) 생성
+  
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  background(random(255), random(255), random(255));
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+  let startTime = 0;
+  for (let i = 0; i < sclaes.length; i++) {
+    let myFreq = midiToFreq(sclaes[i]);		// 미디번호를 주파수로 변환
+    polySynth.play(myFreq, 1.0, startTime, 0.3);
+    startTime += 0.5;				// 시작시간 갱신
+  }
+}

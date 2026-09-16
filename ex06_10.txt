@@ -1,0 +1,51 @@
+// 마우스의 상하좌우 움직임에 반응하는 ADSR의 attackTime과 attackLevel 변화
+
+let env, osc, fft, d, attackLevel = 0, attackTime = 0;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  env = new p5.Envelope();			// p5.Envelope 객체(env) 생성
+  osc = new p5.Oscillator();			// p5.Oscillator 객체(osc) 생성
+  osc.setType('sine');				// 오실레이터의 유형 설정(기본값: 'sine')
+  osc.freq(440);				// 오실레이터의 초기 주파수 설정(440Hz)
+  osc.amp(env);				// 오실레이터의 진폭 설정 시 포락선 적용
+  osc.start();					// 오실레이터 시작
+  
+  fft = new p5.FFT();				// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+  
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);		// x값의 범위 제한: 0∼width
+  attackTime = map(x, 0, width, 0, 1);	// attackTime값 범위 변경
+  
+  let y = constrain(mouseY, 0, height);	// y값의 범위 제한: 0∼height
+  attackLevel = map(y, 0, height, 1, 0);	// attackLevel값 범위 변경
+  
+  fill(attackTime*255, attackLevel*255, 255);
+  ellipse(x, y, 50, 50);
+  
+  let wave = fft.waveform();			// 시간 영역의 진폭값 배열 반환
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 시간 파형 그리기 종료
+  
+  d.html('Attack Time: ' + nf(attackTime, 1, 2) + ' Attack Level: ' + nf(attackLevel, 1, 2));
+}
+
+function canvasPressed() {			// 콜백함수
+  env.setADSR(attackTime, 0.2, 0.3, 0.4);
+  env.setRange(attackLevel, 0);		// attackLevel, releaseLevel=0
+  env.play();					// ADSR 포락선 음원의 재생
+}

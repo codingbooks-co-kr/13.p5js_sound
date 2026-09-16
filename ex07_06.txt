@@ -1,0 +1,37 @@
+// 원이 낙하하면서 음을 순차 재생 (슬라이더로 낙하 속도 조절)
+
+let monoSynth, slider, x = 25, y = 0, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  createCanvas(400, 400);
+  monoSynth = new p5.MonoSynth();	// p5.MonoSynth 객체(monoSynth) 생성 
+
+  slider = createSlider(1, 10, 3, 1);	// 슬라이더 생성 (범위:1∼10, 초깃값:3, 스텝크기:1)
+  slider.size(width);			// 슬라이더 크기 설정
+}
+
+function draw() {
+  background(0, 10);			// 페이딩 효과
+  if (y > height) {			// 낙하하는 원이 바닥에 도달하는 경우
+    let myFreq = midiToFreq(sclaes[index]);		// 미디번호를 주파수로 변환
+    monoSynth.play(myFreq, 1, 0, 0.3);		// 음 재생
+    index = (index + 1) % sclaes.length;		// index = 0∼7 순을 반복
+    x = index * (width / sclaes.length) + 25;
+    y = 0;
+  } else {
+    y += slider.value();					// 슬라이더 값을 읽고 y에 누적
+  }
+
+  for (let i = 0; i < sclaes.length; i++) {		// 미디번호 표시 및 세로선 그리기
+    noStroke();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    text(sclaes[i], i * (width / sclaes.length) + (width / sclaes.length) / 2, height/2);
+    stroke(255);
+    line(i * (width / sclaes.length), 0, i * (width / sclaes.length), height);
+  }
+  noStroke();						// 외곽선 제거(부드러운 페이딩 효과)
+  fill(0, 255, 0);
+  ellipse(x, y, 25, 25);
+}

@@ -1,0 +1,21 @@
+// 사인파의 누적으로 톱니파형의 궤적 그리기
+
+let num = 5, degree = 0;
+
+function setup() {
+  createCanvas(720, 320);			// 가로 길이는 사인파의 2주기 길이(360*2)
+  angleMode(DEGREES);			// 각도로 도(Degree) 단위를 사용
+  background(0);
+}
+
+function draw() {
+  y = 0;
+  for (let i = 0; i < num; i++) {		// num개의 사인파 누적
+    let n = i + 1;				// n: 하모닉 주파수
+    let r = 100 / n;				// r: 하모닉 성분의 크기
+    y += r * sin(n * degree);			// 사인파 누적
+  }
+  noStroke();
+  ellipse(degree, height/2+y, 10, 10);		// 궤적을 원으로 그리기
+  degree++;					// 1도씩 증가
+}

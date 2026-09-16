@@ -1,0 +1,41 @@
+// 사운드 파일 재생 시 주파수 대역별 에너지 표시-2 (마우스를 누를 때마다 재생/정지 토글)
+
+let soundFile, fft;
+
+function preload() {
+  soundFile = loadSound('data/piano.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  fft = new p5.FFT();				// p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  fft.analyze();					// ❶ 주파수 스펙트럼 분석
+
+  // ❷ 주파수 대역별 에너지 표시
+  let bass = fft.getEnergy('bass');
+  let lowMid = fft.getEnergy('lowMid');
+  let mid = fft.getEnergy('mid');
+  let highMid = fft.getEnergy('highMid');
+  let treble = fft.getEnergy('treble');
+  let bins = [bass, lowMid, mid, highMid, treble];
+  for (let i = 0; i < 5; i++) {			// 5개의 대역별 에너지를 사각형으로 표시
+    stroke(255, 255, 0);
+    noFill();
+    let y = map(bins[i], 0, 255, 0, height);
+    rect((i+1)*width/5 - width/5, height-y, width/5, y);
+  }
+}
+
+function canvasPressed() {
+  if (soundFile.isPlaying()) {		// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();			// 사운드 파일 재생 일시 정지
+  } else {				// 사운드가 재생되고 있지 않은 경우
+    soundFile.loop();			// 사운드 파일 무한 반복 재생
+  }
+}

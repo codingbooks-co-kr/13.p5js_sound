@@ -1,0 +1,34 @@
+// 캔버스를 눌러 음 순차 재생/정지 토글
+
+let monoSynth, soundLoop, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];			// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  soundLoop = new p5.SoundLoop(onSoundLoop, 0.5);	// 0.5초마다 콜백함수 호출
+  
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 순차 재생/정지', width/2, height/2);
+}
+
+function canvasPressed() {
+  if (soundLoop.isPlaying) {			// 사운드처리 콜백함수의 호출이 있으면 true
+    soundLoop.stop();				// 사운드처리 콜백함수의 호출 정지
+  } else {
+    soundLoop.start();				// 사운드처리 콜백함수를 반복 호출 시작
+  }
+}
+
+function onSoundLoop(time) {
+  let myFreq = midiToFreq(sclaes[index]);	// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, time, 0.3);	// 음 재생
+
+  background(0);
+  text('미디번호: ' + sclaes[index] + ' 주파수: ' + int(myFreq) + 'Hz', width/2, height/2);
+  index = (index + 1) % sclaes.length;	// index = 0∼7 순으로 반복
+}

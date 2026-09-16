@@ -1,0 +1,25 @@
+// 사운드의 음량 크기 변화를 3차원 구의 크기 변화로 변경
+
+let soundFile, myAmp, angle = 0;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3'); 	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 500, WEBGL);		// 3차원 렌더러 사용
+  soundFile.play();				// 사운드 파일 재생
+  myAmp = new p5.Amplitude();		// p5.Amplitude 객체(myAmp) 생성
+}
+
+function draw() {
+  background(0);
+  rotateX(angle);				// x축 회전
+  rotateY(angle);				// y축 회전
+  rotateZ(angle);				// z축 회전
+
+  let level = myAmp.getLevel() * 1000;	// 진폭값(level): 0∼1000
+  fill(0, 255, 0);
+  sphere(level, 24, 24);				// 사운드 샘플 진폭값을 구의 크기로 표시
+  angle += 0.01;
+}

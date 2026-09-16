@@ -1,0 +1,19 @@
+// 마이크 입력 음량을 원의 크기 변화로 표현
+
+let mic;
+
+function setup() {
+  createCanvas(500, 500);
+  mic = new p5.AudioIn();			// p5.AudioIn 객체(mic) 생성
+  mic.start();					// ❶ 마이크 입력 시작
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과
+  let level = mic.getLevel();			// ❷ 마이크 음량값(=진폭값: 0∼1) 반환
+  let myLevel = map(level, 0, 1, 10, 500);	// 음량 범위 변경
+
+  noStroke();					// 원의 외곽선 제거 (부드러운 페이딩 효과)
+  fill(255, 255, 0);
+  ellipse(width/2, height/2, myLevel, myLevel);	// 마이크 음량 = 원의 지름 변화
+}

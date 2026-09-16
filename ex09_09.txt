@@ -1,0 +1,28 @@
+// 440Hz 삼각파 오실레이터의 스펙트로그램 (HSB 컬러모드)
+
+let osc, fft, bins = 128, x = 0, step = 3;
+
+function setup() {
+  createCanvas(500, 200);
+  osc = new p5.Oscillator();			// p5.Oscillator 객체(osc) 생성
+  osc.setType('triangle');			// 오실레이터의 유형 설정(삼각파)
+  osc.freq(440);					// 오실레이터의 주파수 설정(440Hz)
+  osc.start();					// 오실레이터 시작
+  fft = new p5.FFT(0.8, bins);			// 0.8: 스무딩값, bins: 스펙트럼 배열 크기
+
+  background(0);
+  colorMode(HSB);				// HSB 컬러모드
+}
+
+function draw() { 
+  let spectrum = fft.analyze();			// ❶ 주파수 영역의 진폭값 배열 반환
+  noStroke();
+  for (let i = 0; i < spectrum.length; i++) {	// spectrum.length=128 (=bins값)
+    let y = map(i, 0, spectrum.length, height, 0);
+    let rectHeight = height / spectrum.length;
+    let h = map(spectrum[i], 0, 255, 0, 240);	// Hue값 변환: 진폭(0∼255)→색상(0o∼240o)
+    fill(h, 100, 100);				// S(채도)와 B(밝기)가 100%일 때 색상(H) 설정
+    rect(x, y-rectHeight, step, rectHeight);	// [수정3] 참조
+  }
+  x = (x + step) % width;			// x=0,3,6,9,...,498 순으로 3씩 증가를 반복
+}

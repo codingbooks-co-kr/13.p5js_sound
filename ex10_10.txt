@@ -1,0 +1,31 @@
+// 사운드 파일 재생 시 필터링효과 적용 (캔버스를 누를 때마다 재생/정지 토글)
+
+let soundFile, myFilter;
+
+function preload() {
+  soundFile = loadSound('data/piano.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  myFilter = new p5.Filter();			// p5.Filter 객체(myFilter) 생성
+  myFilter.connect();				// myFilter 객체를 메인출력(→스피커)에 연결
+  myFilter.setType('lowpass');			// 필터유형:'lowpass', 'highpass', 'bandpass'
+  myFilter.process(soundFile, 500);		// 음원:soundFile, 필터링주파수:500Hz
+
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 필터링효과(LPF) 적용', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  if (soundFile.isPlaying()) {			// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();				// 사운드 파일 재생 일시 정지
+  } else {					// 사운드가 재생되고 있지 않은 경우
+    soundFile.play();				// 사운드 파일 재생
+  }
+}

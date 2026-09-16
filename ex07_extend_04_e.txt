@@ -1,0 +1,29 @@
+// setInterval()과 clearInterval()을 사용한 음 순차 재생 또는 정지
+
+let polySynth, myId, index = 0, myToggle = false;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  createCanvas(500, 200);
+  polySynth = new p5.PolySynth();	// p5.PolySynth 객체(polySynth) 생성
+  myId = setInterval(playSound, 500);	// 500msec마다 콜백함수(=playSound) 호출
+  
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function mousePressed() {				// 이벤트함수
+  if (myToggle) myId = setInterval(playSound, 500);	// 500msec마다 playSound() 호출
+  else clearInterval(myId);				// 타이머(myId) 취소
+  myToggle = !myToggle;				// 값 토글(true 또는 false)
+}
+
+function playSound() {				// 콜백함수
+  let myFreq = midiToFreq(sclaes[index]);	// 미디번호를 주파수로 변환
+  polySynth.play(myFreq, 1, 0, 0.3);		// 음 재생
+  
+  background(0);
+  text('미디번호: ' + sclaes[index] + ', 주파수: ' + int(myFreq) + 'Hz', width/2, height/2);
+  index = (index + 1) % sclaes.length;	// index = 0∼7 순으로 반복
+}

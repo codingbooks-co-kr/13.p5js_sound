@@ -1,0 +1,37 @@
+// 캔버스를 눌러 동요 재생-1
+
+let polySynth;
+let melody = [ 	// 객체리터럴 = {num:미디번호, sustainTime:지속시간}
+  {num:67, sustainTime:0.3},
+  {num:67, sustainTime:0.3},
+  {num:69, sustainTime:0.3},
+  {num:69, sustainTime:0.3},
+  {num:67, sustainTime:0.3},
+  {num:67, sustainTime:0.3},
+  {num:64, sustainTime:0.6},
+  {num:67, sustainTime:0.3},
+  {num:67, sustainTime:0.3},
+  {num:64, sustainTime:0.3},
+  {num:64, sustainTime:0.3},
+  {num:62, sustainTime:0.9} ];
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  polySynth = new p5.PolySynth();		// p5.PolySynth 객체(polySynth) 생성
+  
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 동요 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  let velocity = 1, startTime = 0, rest = 0.2;
+  for (let i = 0; i < melody.length; i++) {
+    let note = melody[i];
+    let myFreq = midiToFreq(note.num);	// 미디번호를 주파수로 변환
+    polySynth.play(myFreq, velocity, startTime, note.sustainTime);
+    startTime += (note.sustainTime + rest);	// 시작시간 갱신 (rest: 무음 지속시간)
+  }
+}

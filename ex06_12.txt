@@ -1,0 +1,39 @@
+// 캔버스를 누르면 짧은 노이즈음 출력 및 파형 표시
+
+let env, noise, fft;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  env = new p5.Envelope();		// p5.Envelope 객체(env) 생성
+  env.setADSR(0.01, 0.2, 0.3, 0.4);	// 어택시간, 감쇠시간, 지속속도, 릴리즈시간 설정
+  env.setRange(1, 0);			// 생략가능(기본값): attackLevel=1, releaseLevel=0
+  
+  noise = new p5.Noise('white');	// p5.Noise 객체(noise) 생성('white' 노이즈 초기화)
+  noise.amp(env);			// 노이즈의 진폭 제어 (생략 시 노이즈음이 지속됨)
+  noise.start();				// 노이즈 시작
+  fft = new p5.FFT();			// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과
+  noStroke();
+  fill(255);
+  text('노이즈 타입: ' + noise.getType(), 30, 30);
+  
+  let wave = fft.waveform();			// 시간 영역의 진폭값 배열 반환
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 시간 파형 그리기 종료
+}
+
+function canvasPressed() {			// 콜백함수
+  env.play();					// ADSR 포락선 음원의 재생
+}

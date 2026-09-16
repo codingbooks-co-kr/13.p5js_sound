@@ -1,0 +1,30 @@
+// 사운드 파일 재생 시 왜곡효과 적용 (캔버스를 누를 때마다 재생/정지 토글)
+
+let soundFile, distortion;
+
+function preload() {
+  soundFile = loadSound('data/piano.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  distortion = new p5.Distortion();		// p5.Distortion 객체(distortion) 생성
+  distortion.connect();				// distortion 객체를 메인출력(→스피커)에 연결
+  distortion.process(soundFile, 0.2, '4x');	// 음원, 왜곡량: 0.2, 오버샘플링: '4x'
+
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 왜곡효과 적용', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  if (soundFile.isPlaying()) {			// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();				// 사운드 파일 재생 일시 정지
+  } else {					// 사운드가 재생되고 있지 않은 경우
+    soundFile.play();				// 사운드 파일 재생
+  }
+}

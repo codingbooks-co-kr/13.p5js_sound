@@ -1,0 +1,53 @@
+// 사운드 믹싱(Sound Mixing)-2
+
+let sound1, sound2, masterGain, sound1Gain, sound2Gain;
+
+function preload() {
+  sound1 = loadSound('data/piano.mp3'); 	// sound1 객체 생성 및 초기화(파일 로딩)
+  sound2 = loadSound('data/latin.mp3'); 	// sound2 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 200);
+  masterGain = new p5.Gain();		// 두 사운드를 믹싱하기 위해 masterGain 객체 생성
+  masterGain.connect();		// masterGain 객체를 메인출력(→스피커)에 연결
+  
+  sound1.disconnect();			// sound1 객체의 출력 연결 해제
+  sound1Gain = new p5.Gain();	// p5.Gain 객체(sound1Gain) 생성
+  sound1Gain.setInput(sound1);	// sound1Gain 객체의 입력소스(→sound1) 설정
+  sound1Gain.connect(masterGain);	// sound1Gain 객체를 masterGain 객체와 연결
+  
+  sound2.disconnect();			// sound2 객체의 출력 연결 해제
+  sound2Gain = new p5.Gain();	// p5.Gain 객체(sound2Gain) 생성
+  sound2Gain.setInput(sound2);	// sound2Gain 객체의 입력소스(→sound2) 설정
+  sound2Gain.connect(masterGain);	// sound2Gain 객체를 masterGain 객체와 연결
+  
+  sound1.loop();			// 사운드 파일(sound1) 무한 반복 재생
+  sound2.loop();			// 사운드 파일(sound2) 무한 반복 재생
+}
+
+function draw() {
+  background(0);
+  let y = constrain(mouseY, 0, height);	// 마우스 상하 움직임 제한 범위: 0∼height
+  let masterVolume = map(y, 0, height, 1, 0);
+  masterGain.amp(masterVolume);		// masterGain 객체의 음량 설정
+  
+  let x = constrain(mouseX, 0, width);		// 마우스 좌우 움직임 제한 범위: 0∼width
+  let sound1Volume = map(x, 0, width, 1, 0);		// 음량1의 변경된 범위: 1∼0
+  let sound2Volume = 1 - sound1Volume;		// 음량1과 음량2의 크기 반전
+  sound1Gain.amp(sound1Volume);		// sound1Gain 객체의 음량 설정
+  sound2Gain.amp(sound2Volume);		// sound2Gain 객체의 음량 설정
+  
+  fill(0, 255, 0);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('음량: ' + nf(masterVolume, 1, 2), width/2, height/2);
+
+  fill(255, 255 * sound1Volume);
+  textAlign(LEFT);				// 문자열 왼쪽 정렬
+  text('sound1', 5, height/2);
+  
+  fill(255, 255 * sound2Volume);
+  textAlign(RIGHT);				// 문자열 오른쪽 정렬
+  text('sound2', width-5, height/2);
+}

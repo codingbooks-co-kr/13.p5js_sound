@@ -1,0 +1,32 @@
+// 사운드 파일의 재생 시 스펙트럼 진폭의 변화에 따라 낙하하는 원들의 크기 변화
+
+let soundFile, fft, bins = 512, y = [];
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(700, 500);
+  colorMode(HSB);				// HSB 컬러모드
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  fft = new p5.FFT(0.8, bins);			// 0.8: 스무딩값, bins: 스펙트럼 배열 크기
+  for (let i = 0; i < bins; i++) {	
+    y[i] = random(height);			// 원의 y축 초기 위치를 랜덤 설정
+  }
+}
+
+function draw() {
+  background(0, 0.1);				// 페이딩 효과(HSB 컬러모드의 투명도: 0∼1)
+  spectrum = fft.analyze();			// 주파수 영역의 스펙트럼 분석
+  for (let i = 0; i < spectrum.length; i++) {	// spectrum.length=512 (=bins)
+    let x = map(i, 0, spectrum.length, 0, width);	// 원의 x좌표 범위(x: 0∼width)
+    let d = map(spectrum[i], 0, 255, 5, 50);		// 원의 크기 범위(d: 5∼50)
+    let h = map(i, 0, spectrum.length, 0, 360);	// 원의 색상 범위(h: 0∼360)
+    noStroke();
+    fill(h, 100, 100);				// S(채도)와 B(밝기)가 100%일 때 색상(H) 설정
+    ellipse(x, y[i], d, d);			// 낙하하는 원의 크기는 진폭에 따라 변화
+    y[i]++;					// 등속 낙하
+    if (y[i] > height) y[i] = 0;			// 바닥에 도달하면 다시 상단에서 낙하 시작
+  }
+}

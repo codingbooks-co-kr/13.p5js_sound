@@ -1,0 +1,44 @@
+// 사운드 파일 재생 시 주파수 대역별 에너지 표시-1 (마우스를 누를 때마다 재생/정지 토글)
+
+let soundFile, fft, bandWidth = 8;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup()  {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  fft = new p5.FFT();				// p5.FFT 객체(fft) 생성
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+}
+
+function draw() {
+  background(0);
+  fft.analyze();						// ❶ 주파수 스펙트럼 분석
+  for (let i = 0; i < bandWidth; i++) {
+    let centerFreq = (pow(2, i) * 100) / 2;
+    let lowFreq = centerFreq - centerFreq / 4;
+    let highFreq = centerFreq + centerFreq / 2;
+    let energy = fft.getEnergy(lowFreq, highFreq);	// ❷ 스펙트럼 에너지 구하기
+    let y = map(energy, 0, 255, 0, height);
+
+    stroke(255, 255, 0);
+    noFill();
+    rect((i+1)*width/bandWidth-width/bandWidth, height-y, width/bandWidth, y);
+
+    noStroke();
+    fill(255);
+    textAlign(CENTER, CENTER);
+    text(int(lowFreq)+'Hz', i*width/bandWidth+30, 20);
+    text('∼' + int(highFreq)+'Hz', i*width/bandWidth+30, 40);
+  }
+}
+
+function canvasPressed() {
+  if (soundFile.isPlaying()) {		// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();			// 사운드 파일 재생 일시 정지
+  } else {				// 사운드가 재생되고 있지 않은 경우
+    soundFile.loop();			// 사운드 파일 무한 반복 재생
+  }
+}

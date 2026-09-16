@@ -1,0 +1,31 @@
+// 캔버스를 누를 때마다 복수 개의 사운드 파일 순차 재생
+
+let soundFiles = [], num = 0;
+let soundList = ['data/latin.mp3', 'data/jazz.mp3', 'data/guitar.mp3', 'data/piano.mp3'];
+
+function preload() {
+  for (let i = 0; i < soundList.length; i++) {
+    soundFiles[i] = loadSound(soundList[i]);	// 사운드 파일 객체 생성 및 배열에 추가
+  }
+}
+
+function setup() {
+  let canvas = createCanvas(400, 100);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  background(200);
+  textSize(15);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 누를 때마다 사운드 파일 순차 재생', width/2, height/2);
+}
+
+function canvasPressed()  {			// 콜백함수
+  background(random(255), random(255), random(255));
+  text('캔버스를 누를 때마다 사운드 파일 순차 재생', width/2, height/2);
+  for (let i = 0; i < soundFiles.length; i++) {	// 모든 사운드 파일에 대해 반복 처리
+    if (soundFiles[i].isPlaying()) {		// 사운드가 재생 중인 경우
+      soundFiles[i].stop();			// ❶사운드 재생 정지
+    }
+  }
+  soundFiles[num].play();			// ❷사운드 파일 재생
+  num = (num + 1) % soundFiles.length;	// num = 0,1,2,3,0,1,2,3... 순으로 반복
+}

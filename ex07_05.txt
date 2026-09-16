@@ -1,0 +1,48 @@
+// 가상 피아노: 건반(→도,미,솔)을 만들고 마우스로 누르면 해당 음 출력
+
+let monoSynth, d;
+
+function setup() {
+  createCanvas(350, 300);
+  background(0);
+  monoSynth = new p5.MonoSynth();	// p5.MonoSynth 객체(monoSynth) 생성
+
+  buttonC = createButton('도C4');	// 버튼 생성 (버튼 레이블은 '도C4')
+  buttonC.position(50, 50);		// 버튼 위치 설정
+  buttonC.size(50, 200); 		// 버튼 크기 설정
+  buttonC.style('font-size', '20px'); 	// 버튼 폰트 크기 (20픽셀로) 설정
+  buttonC.mousePressed(noteC4); 	// 버튼 누르면 noteC4() 자동 호출
+  
+  buttonE = createButton('미E4');	// 버튼 생성 (버튼 레이블은 '미E4')
+  buttonE.position(150, 50);		// 버튼 위치 설정
+  buttonE.size(50, 200); 		// 버튼 크기 설정
+  buttonE.style('font-size', '20px'); 	// 버튼 폰트 크기 (20픽셀로) 설정
+  buttonE.mousePressed(noteE4); 	// 버튼 누르면 noteE4() 자동 호출
+  
+  buttonG = createButton('솔G4');	// 버튼 생성 (버튼 레이블은 '솔G4')
+  buttonG.position(250, 50);		// 버튼 위치 설정
+  buttonG.size(50, 200); 		// 버튼 크기 설정
+  buttonG.style('font-size', '20px'); 	// 버튼 폰트 크기 (20픽셀로) 설정
+  buttonG.mousePressed(noteG4); 	// 버튼 누르면 noteG4() 자동 호출
+  
+  d = createDiv('건반을 마우스로 누르세요!');
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function noteC4() {			// 콜백함수
+  playNote(60);
+}
+
+function noteE4() {			// 콜백함수
+  playNote(64);
+}
+
+function noteG4() {			// 콜백함수
+  playNote(67);
+}
+
+function playNote(midiNum) {			// 사용자정의함수
+  let myFreq = midiToFreq(midiNum);		// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, 0, 0.3);		// 음 재생
+  d.html('미디: ' + nf(midiNum, 2) + ', 주파수: ' + nf(myFreq, 3, 1) + 'Hz');
+}

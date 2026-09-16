@@ -1,0 +1,26 @@
+// 마우스를 좌우로 움직이면 스테레오 음원 위치도 좌우로 이동
+
+let osc;
+
+function setup() {
+  createCanvas(500, 200);
+  osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.freq(440);					// 오실레이터의 초기 주파수 설정(440Hz)
+  osc.start();					// 오실레이터 시작
+
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);		// 마우스 좌우 움직임 제한 범위: 0∼width
+  fill(255, 255, 0, 200);
+  ellipse(x, height/2, 100, 100);		// 음원의 위치를 원으로 표시
+  
+  let panValue = map(x, 0, width, -1, 1);	// 최종 음원 위치값 변경 범위: -1.0∼1.0
+  osc.pan(panValue);				// 오실레이터의 스테레오 음원 위치값 설정
+
+  fill(255);
+  text('팬: ' + nf(panValue, 1, 2), width/2, height/2);
+}

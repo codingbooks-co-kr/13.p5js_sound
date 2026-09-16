@@ -1,0 +1,27 @@
+// 마이크 입력 신호의 주파수 스펙트럼을 방사형으로 표시 (HSB 컬러모드)
+
+let mic, fft;
+
+function setup() {
+  createCanvas(500, 500);
+  mic = new p5.AudioIn();			// p5.AudioIn 객체(mic) 생성
+  mic.start();					// 마이크 입력 시작
+  fft = new p5.FFT();				// 스펙트럼 표시를 위해 p5.FFT 객체(fft) 생성
+  fft.setInput(mic);				// fft 객체의 입력소스(→mic 객체) 설정
+  colorMode(HSB);				// HSB 컬러모드
+}
+
+function draw() {
+  background(0);
+  let spectrum = fft.analyze();				// 주파수 영역의 스펙트럼 분석
+  for (let i = 0; i < spectrum.length; i++) {		// 기본값: spectrum.length=1024
+    let theta = map(i, 0, spectrum.length, 0, TWO_PI);	// theta: 0∼2π
+    let r = map(spectrum[i], 0, 255, 20, width/2);	// r: 진폭(반지름)
+    let x = width/2 + r * cos(theta);			// 원주상의 x좌표
+    let y = height/2 + r * sin(theta);			// 원주상의 y좌표
+    let h = map(theta, 0, TWO_PI, 0, 360);		// 방사형 선 색상(h) 범위: 0∼360
+    stroke(h, 100, 100);				// 방사형 선 색상(h) 설정
+    strokeWeight(3);
+    line(width/2, height/2, x, y);			// 방사형 선 그리기
+  }
+}

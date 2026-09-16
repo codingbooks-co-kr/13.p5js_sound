@@ -1,0 +1,25 @@
+// 캔버스를 눌러 세 개의 음(도,미,솔) 순차 재생
+
+let polySynth;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  polySynth = new p5.PolySynth();		// p5.PolySynth 객체(polySynth) 생성
+
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+}
+
+function canvasPressed() {				// 콜백함수
+  background(random(255), random(255), random(255));
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+  let startTime = 0;
+  polySynth.play(midiToFreq(60), 1.0, startTime, 0.5);	// 주파수, 속도, 시작시간, 지속시간
+  startTime += 0.5;					// 시작시간 누적
+  polySynth.play(midiToFreq(64), 1.0, startTime, 0.3);
+  startTime += 0.5;					// 시작시간 누적
+  polySynth.play(midiToFreq(67), 1.0, startTime, 1.0);
+}

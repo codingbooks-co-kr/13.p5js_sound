@@ -1,0 +1,25 @@
+// 마이크 입력 음량에 따라 원의 랜덤 이동 속도 제어
+
+let mic, x = 200, y = 200;
+
+function setup() {
+  createCanvas(400, 400);
+  mic = new p5.AudioIn();			// p5.AudioIn 객체(mic) 생성
+  mic.start();					// 마이크 입력 시작
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과
+  let level = mic.getLevel();			// 마이크 음량(진폭: 0∼1) 반환
+  let velocity = map(level, 0, 1, 0, 100);	// 음량을 원의 이동 속도로 변환
+  
+  x += random(-velocity, velocity);		// x에 랜덤값 누적 
+  y += random(-velocity, velocity);		// y에 랜덤값 누적 
+  
+  x = constrain(x, 0, width);			// x값의 범위 제한: 0∼width
+  y = constrain(y, 0, height);			// y값의 범위 제한: 0∼height
+  
+  noStroke();					// 외곽선 제거 (부드러운 페이딩 효과)
+  fill(255);
+  ellipse(x, y, 20, 20);				// (x, y) 좌표에 원 그리기
+}

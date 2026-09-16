@@ -1,0 +1,61 @@
+// 버튼으로 사운드 녹음, 확인 및 파일 저장
+
+let mic, rec, soundFile;
+let button1, button2, button3, recording = true;
+
+function setup() {
+  createCanvas(450, 200);
+  mic = new p5.AudioIn();			// p5.AudioIn 객체(mic) 생성
+  mic.start();					// 마이크 입력 시작
+
+  rec = new p5.SoundRecorder();		// p5.SoundRecorder 객체(rec) 생성
+  rec.setInput(mic);				// rec 객체의 입력소스(→mic 객체) 설정
+  soundFile = new p5.SoundFile();		// 빈 사운드 파일 객체 생성
+  
+  button1 = createButton('녹음시작');		// 버튼 객체(button1) 생성
+  button1.size(150, 50); 			// 버튼 크기 설정
+  button1.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button1.mousePressed(recordStart);		// 버튼 누르면 record() 자동 호출
+  
+  button2 = createButton('녹음확인');		// 버튼 객체(button2) 생성
+  button2.size(150, 50); 			// 버튼 크기 설정
+  button2.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button2.mousePressed(recordPlay);		// 버튼 누르면 record() 자동 호출
+  
+  button3 = createButton('파일저장');		// 버튼 객체(button3) 생성
+  button3.size(150, 50); 			// 버튼 크기 설정
+  button3.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button3.mousePressed(recordSave);		// 버튼 누르면 record() 자동 호출
+  
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+  
+function recordStart() {				// 콜백함수
+  if (recording) {
+    background(255, 0, 0);
+    text('녹음중...', width/2, height/2);
+    button1.html('녹음 종료');
+    rec.record(soundFile);			// 녹음 시작
+  } else {
+    background(0);
+    text('녹음 종료', width/2, height/2);
+    button1.html('녹음 시작');
+    rec.stop();					// 녹음 중지
+  }
+  recording = !recording;			// 토글
+}
+
+function recordPlay() {				// 콜백함수
+  background(0, 0, 255);
+  text('녹음 확인', width/2, height/2);
+  soundFile.play();				// 사운드 파일 재생
+}
+
+function recordSave() {				// 콜백함수
+  background(0, 0, 255);
+  text('파일 저장', width/2, height/2);
+  saveSound(soundFile, 'mySound.wav');	// 녹음 사운드를 파일(→wav 형식)로 저장
+}

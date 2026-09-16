@@ -1,0 +1,43 @@
+// 캔버스를 누를 때마다 구형파 오실레이터의 음계 스펙트럼 순차 표시-1
+
+let env, osc, fft, index = 0, myFreq = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  env = new p5.Envelope();		// p5.Envelope 객체(env) 생성
+  env.setADSR(0.01, 0.2, 0.3, 0.4);	// attackTime, decayTime, sustainLevel, releaseTime
+  env.setRange(1, 0);			// 생략가능(기본값): attackLevel=1, releaseLevel=0
+
+  osc = new p5.Oscillator();		// p5.Oscillator 객체(osc) 생성
+  osc.setType('square');			// 오실레이터의 유형 설정(구형파)
+  osc.amp(env);			// 오실레이터의 진폭 설정 시 ADSR 포락선 적용
+  osc.start();				// 오실레이터 시작
+
+  fft = new p5.FFT();			// 스펙트럼 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  let spectrum = fft.analyze();				// 주파수 영역의 진폭값 배열 반환
+  stroke(0, 255, 0);
+  for (let i = 0; i < spectrum.length; i++) {		// 기본값: spectrum.length=1024
+    let x = map(i, 0, spectrum.length, 0, width);	// x: 주파수
+    let y = map(spectrum[i], 0, 255, height, 0);	// y: 진폭
+    line(x, height, x, y);				// 주파수 스펙트럼을 선으로 표시
+  }
+
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('파형 타입: ' + osc.getType() + ' 주파수: ' + int(myFreq) + 'Hz', 10, 30);
+}
+
+function canvasPressed() {			// 콜백함수
+  myFreq = midiToFreq(sclaes[index]);		// 미디번호를 주파수로 변환
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+  env.play();					// ADSR 포락선 음원의 재생
+  index = (index + 1) % sclaes.length;	// index = 0∼7 순으로 반복
+}

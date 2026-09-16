@@ -1,0 +1,28 @@
+// 노이즈 객체와 필터링 객체 연결-1
+
+let noise, myFilter;
+
+function setup() {
+  let canvas = createCanvas(400, 100);
+  canvas.mousePressed(canvasPressed);
+
+  noise = new p5.Noise('white');
+  noise.disconnect();		// 연결해제
+
+  myFilter = new p5.Filter('lowpass');
+  myFilter.connect();		// 연결
+  myFilter.process(noise, 500);
+  
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('노이즈 필터링(LPF)', width/2, height/2);
+}
+
+function canvasPressed() {
+  noise.start();
+}
+
+function mouseReleased() {
+  noise.stop();
+}

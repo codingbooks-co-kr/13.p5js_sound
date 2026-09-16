@@ -1,0 +1,30 @@
+// 사운드 파일 재생 시 잔향효과 적용 (캔버스를 누를 때마다 재생/정지 토글)
+
+let soundFile, reverb;
+
+function preload() {
+  soundFile = loadSound('data/piano.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  reverb = new p5.Reverb();			// p5.Reverb 객체(reverb) 생성
+  reverb.connect();				// reverb 객체를 메인출력(→스피커)에 연결
+  reverb.process(soundFile, 3, 2);		// 음원, 잔향지속시간(3초), 에코감쇠율(2%)
+
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 잔향효과 적용', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  if (soundFile.isPlaying()) {			// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();				// 사운드 파일 재생 일시 정지
+  } else {					// 사운드가 재생되고 있지 않은 경우
+    soundFile.play();				// 사운드 파일 재생
+  }
+}

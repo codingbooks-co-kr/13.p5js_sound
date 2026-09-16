@@ -1,0 +1,65 @@
+// p5.js: 가변저항값 2개 수신 후 사인파의 주파수와 진폭 제어
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let osc, fft, d, myFreq = 0, myAmp = 0;
+
+function setup() {
+  createCanvas(500, 200);
+  port.getPorts();			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton);	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort);	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent);		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+
+  osc = new p5.Oscillator('sine');	// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.start();				// 오실레이터 시작
+
+  fft = new p5.FFT();			// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+  
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  osc.freq(myFreq);			// 오실레이터의 주파수 설정
+  osc.amp(myAmp);			// 오실레이터의 진폭 설정
+  d.html('주파수: ' + nf(myFreq, 3, 1) + 'Hz, 진폭: ' + nf(myAmp, 1, 2));
+  
+  let wave = fft.waveform();		// 시간 영역의 진폭값 배열(wave) 반환
+  stroke(255);				// 파형 선 색상
+  noFill();				// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();				// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();				// 시간 파형 그리기 종료
+}
+
+function serialEvent() {			// 콜백함수: 시리얼 버퍼에 수신값이 있으면 자동 호출
+  let str = port.readLine();		// 수신 (개행까지의 수신 문자열 읽기)
+  if (!str) return;			// 입력 문자열(→str)이 없으면 함수 빠져나가기
+  let s = trim(str);			// 입력 문자열(→str)의 시작과 끝에 붙은 공백 삭제
+  let val = split(s, ',');			// 콤마로 구분된 문자열을 val 배열에 저장
+  if (val.length === 2) {		// 배열의 크기가 두 개일 때
+    myFreq = map(float(val[0]), 0, 1023, 200, 500);	// 실수형으로 변환 후 값 범위 변경
+    myAmp = map(float(val[1]), 0, 1023, 1, 0);	// 실수형으로 변환 후 값 범위 변경
+  }
+  port.write('B');			// 송신 (통신제어신호: 'B')
+}
+
+function makePortButton() {			// 포트 첫 연결 시 포트 선택 버튼 생성
+  let portButton = createButton('포트 선택');	// 버튼 생성
+  portButton.mousePressed(choosePort);	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort();				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수
+  port.open().then(initiateSerial);		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

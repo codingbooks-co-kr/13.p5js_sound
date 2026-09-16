@@ -1,0 +1,42 @@
+// 마이크 입력 신호의 주파수 스펙트럼 및 대역별 에너지 표시
+
+let mic, fft;
+
+function setup() {
+  createCanvas(500, 200);
+  mic = new p5.AudioIn();			// p5.AudioIn 객체(mic) 생성
+  mic.start();					// 마이크 입력 시작
+
+  fft = new p5.FFT();				// p5.FFT 객체(fft) 생성
+  fft.setInput(mic);				// fft 객체의 입력소스(→mic 객체) 설정
+}
+
+function draw() {
+  background(0);
+
+  // ❶ 주파수 스펙트럼 분석 및 표시
+  let spectrum = fft.analyze();			// 주파수 영역의 진폭값 배열 반환
+  stroke(0, 255, 0);				// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 주파수 스펙트럼 그리기 시작
+  for (let i = 0; i < spectrum.length; i++) {	// 기본값: spectrum.length=1024
+    let x = map(i, 0, spectrum.length, 0, width);	// x: 주파수
+    let y = map(spectrum[i], 0, 255, height, 0);	// y: 진폭
+    vertex(x, y);					// 주파수 스펙트럼을 꼭지점으로 표시
+  }
+  endShape();					// 주파수 스펙트럼 그리기 종료
+
+  // ❷ 주파수 대역별 에너지 표시
+  let bass = fft.getEnergy('bass');
+  let lowMid = fft.getEnergy('lowMid');
+  let mid = fft.getEnergy('mid');
+  let highMid = fft.getEnergy('highMid');
+  let treble = fft.getEnergy('treble');
+  let bins = [bass, lowMid, mid, highMid, treble];
+  for (let i = 0; i < 5; i++) {			// 5개의 대역별 에너지를 사각형으로 표시
+    stroke(255, 255, 0);
+    noFill();
+    let y = map(bins[i], 0, 255, 0, height);
+    rect((i+1)*width/5 - width/5, height-y, width/5, y);
+  }
+}

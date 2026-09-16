@@ -1,0 +1,37 @@
+// ❷ 마이크 입력 음량에 따라 크기가 달라지는 랜덤 이동하는 원들
+
+let mic, num = 100;
+let x = [], y = [], speedX = [], speedY = [], c = [];
+
+function setup() {
+  createCanvas(500, 500);
+  mic = new p5.AudioIn();
+  mic.start();
+  
+  for (let i = 0; i < num; i++) {
+    x[i] = random(width);
+    y[i] = random(height);
+    speedX[i] = random(-1, 1);
+    speedY[i] = random(-1, 1);
+    c[i] = color(random(255), random(255), random(255));
+  }
+}
+
+function draw() {
+  background(0, 10);
+  let level = mic.getLevel() * 200;
+  for (let i = 0; i < num; i++) {
+    stroke(c[i]);
+    noFill();
+    ellipse(x[i], y[i], level, level);
+
+    x[i] += speedX[i];
+    y[i] += speedY[i];
+    if (x[i] < 0 || x[i] > width) {
+      speedX[i] *= -1;
+    }
+    if (y[i] < 0 || y[i] > height) {
+      speedY[i] *= -1;
+    }
+  }
+}

@@ -1,0 +1,27 @@
+// 캔버스를 누를 때마다 음이름 배열요소를 차례로 재생
+
+let monoSynth, index = 0;
+let sclaes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];		// 음이름 배열
+// let sclaes = ['C4', 'D4', 'E4', 'F4', 'G4', 'A5', 'B5', 'C5'];	// ❶ 수정1
+// let sclaes = ['A4', 'B4', 'C4', 'D4', 'E4', 'F4', 'G4', 'A5'];	// ❷ 수정2
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  background(0);
+  fill(255);
+  text('음이름: ' + sclaes[index], width/2, height/2);
+
+  monoSynth.play(sclaes[index], 1, 0, 0.3);	// 음 재생
+  index = (index + 1) % sclaes.length;	// index=0∼7 순서를 반복
+}

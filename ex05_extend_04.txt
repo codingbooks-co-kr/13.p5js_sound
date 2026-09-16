@@ -1,0 +1,42 @@
+// 사운드 파일 Drag & Drop (유의점: 파일을 중복 오픈하면 중복 재생됨)
+
+let soundFile, fft;
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.drop(getFile);		// 사운드 파일 열기1: Drag & Drop 후 getFile() 호출
+  createFileInput(getFile);	// 사운드 파일 열기2: 파일 폴더에서 선택 후 getFile() 호출
+  fft = new p5.FFT();		// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  noStroke();
+  fill(255);
+  text('사운드 파일 Drag & Drop', 10, 20);
+  
+  let wave = fft.waveform();			// 시간 영역의 진폭값 배열 반환
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 시간 파형 그리기 종료
+}
+
+function getFile(file) {				// 콜백함수
+  console.log(file.name, file.type, file.size); 	// 파일 정보 읽기
+  console.log(file); 				// 파일 전체 정보 확인
+  if (file.type === 'audio') {
+    soundFile = loadSound(file.data, getSound); // 파일 데이터 로딩 후 getSound() 호출
+  } else {
+    console.log('사운드 파일을 선택하세요!');
+  }
+}
+
+function getSound() {				// 콜백함수
+  soundFile.play();				// 사운드 파일 재생
+}

@@ -1,0 +1,65 @@
+// 신경망 분류(Neural Network Classification)를 이용한 음 영역 분류
+// 캔버스를 세 개의 음 영역으로 나누어 학습하고 마우스를 누른 위치에 분류된 주파수음 출력
+// 분류 전 유의사항: 선행학습모델 파일(3개)을 사전에 “model” 폴더에 업로드/복사해야 함!
+
+let model, monoSynth, d, info = '';
+let numCluster = 3, notes = {1: 262, 2: 330, 3: 392};	// 객체리터럴로 객체 생성
+
+function setup() {
+  let canvas = createCanvas(500, 500);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성
+
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.position(0, height+10);		// 텍스트 출력 위치 설정
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  let options = {				// 객체리터럴로 객체(options) 생성
+    inputs: ['x', 'y'],				// 키(inputs): 값('x', 'y' 좌표 배열)
+    outputs: ['number'],			// 키(outputs): 값('number' 배열)
+    task: 'classification',			// 수행하려는 작업의 유형: 'classification'
+    debug: false				// 학습 과정을 그래프로 시각화: true
+  };
+  model = ml5.neuralNetwork(options);	// neuralNetwork 객체(model) 생성
+  
+  let modelInfo = {				// 선행학습모델 객체(modelInfo) 생성
+    model: 'model/model.json',
+    metadata: 'model/model_meta.json',
+    weights: 'model/model.weights.bin'
+  };
+  model.load(modelInfo, getModel);		// 선행학습모델 로드 후 getModel() 호출
+
+  background(200);
+  colorMode(HSB);				// HSB 컬러모드 
+}
+
+function draw() {
+  d.html(info);					// 문자열(info) 출력
+}
+
+function getModel() {				// 콜백함수: 선행학습모델 로드 후 호출
+  info = '모델 로딩 완료, 분류시작!';
+}
+
+function canvasPressed() {			// 콜백함수: 캔버스 누를 때 호출
+  let inputs = { x: mouseX, y: mouseY };	// 입력 데이터 객체(inputs) 생성
+  model.classify(inputs, getResult);		// 분류: inputs 주어지면 getResult() 자동 호출
+}
+
+function getResult(error, results) {		// 콜백함수: 분류시 호출
+  if (error) {					// 인식 오류 시
+    console.log(error);				// 또는 console.error(error);
+    return;					// 함수 실행 종료
+  }
+  let result = results[0].label;			// 신뢰도가 가장 큰 결과(results[0])의 label
+  info = '분류주파수: ' + notes[result] + 'Hz';
+  monoSynth.play(notes[result], 1, 0, 0.3);	// 분류된 주파수음 출력
+
+  let h = map(result, 1, numCluster, 0, 240);
+  fill(h, 100, 100);				// S(채도)와 B(밝기)가 100%일 때 색상(H) 설정
+  ellipse(mouseX, mouseY, 35, 35);		// 출력을 원으로 표시
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text(result, mouseX, mouseY);		// 신뢰도가 가장 큰 label로 표시
+}

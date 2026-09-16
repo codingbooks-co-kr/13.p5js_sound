@@ -1,0 +1,54 @@
+// 톱니파 생성 (슬라이더로 주전원 개수 조절)
+
+let d, slider, theta = 0, wave = [];
+
+function setup() {
+  createCanvas(700, 300);
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  slider = createSlider(1, 30, 1, 1);		// 슬라이더 생성 (범위:1∼30, 초깃값:1, 스텝:1)
+  slider.size(width);				// 슬라이더 크기 설정
+}
+
+function draw() {
+  background(0);
+  let num = slider.value();			// 슬라이더 값 읽기
+  d.html('Epicycles 개수: ' + num);
+
+  translate(150, height/2);			// ❶ 좌표이동: x=150, y=height/2
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < num; i++) {		// 주전원 num개 그리기
+    let n = i + 1;				// n: 하모닉 주파수
+    let radius = 100 / n;			// radius: 하모닉 성분의 크기
+    
+    let prevX = x;
+    let prevY = y;
+    stroke(255);
+    strokeWeight(2);
+    noFill();
+    ellipse(prevX, prevY, radius*2, radius*2);	// 주전원 그리기
+
+    x += radius * cos(n * theta);
+    y += radius * sin(n * theta);
+    line(prevX, prevY, x, y);			// 주전원의 중심과 원주를 회전하는 선
+  }
+  wave.unshift(y);				// wave[] 배열의 맨 앞에 새로운 요소(y) 추가
+  stroke(255, 0, 0);
+  line(x, y, 200, y);				// 동일코드: line(x, wave[0], 200, wave[0]);
+  
+  translate(200, 0);				// ❷ 좌표이동누적: x=150+200=350, y=height/2
+  stroke(0, 255, 0);				// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {
+    vertex(i, wave[i]);
+  }
+  endShape();					// 시간 파형 그리기 종료
+  
+  if (wave.length > 350) {			// wave 배열의 크기: 350
+    wave.pop();				// 배열의 끝 요소 삭제
+  }
+  theta += 0.05;
+}

@@ -1,0 +1,38 @@
+// 캔버스를 눌러 배열요소의 음 순차 재생: 음량/지속시간/재생간격 랜덤
+
+let monoSynth, soundLoop, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+let sustainTime = [0.2, 0.4, 0.6];			// 음별 지속시간
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  soundLoop = new p5.SoundLoop(onSoundLoop);	// 사운드처리 콜백함수 반복 호출
+
+  background(0);
+  fill(255);
+  textSize(25);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 음 순차 재생', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  soundLoop.interval = random(0.3, 1.0);	// 콜백함수의 랜덤 호출시간 간격: 0.3∼1.0초
+  if (soundLoop.isPlaying) {			// 사운드처리 콜백함수의 호출이 있으면 true
+    soundLoop.stop();				// 사운드처리 콜백함수의 호출 정지
+  } else {
+    soundLoop.start();				// 사운드처리 콜백함수를 반복 호출 시작
+  }
+}
+
+function onSoundLoop(time) {				// 콜백함수
+  let myFreq = midiToFreq(sclaes[index]);		// 미디번호를 주파수로 변환
+  let velocity = random(0.1, 1.0);			// 랜덤 음속도(=음량: 0.1∼1.0)
+  let susTime = random(sustainTime);			// 랜덤 음지속시간(0.2, 0.4, 0.6)
+  monoSynth.play(myFreq, velocity, time, susTime);	// 음 재생
+
+  background(0);
+  text('미디번호: ' + sclaes[index] + '\n주파수: ' + int(myFreq) + 'Hz' + '\n음량: ' + nf(velocity, 1, 1) + '\n지속시간: ' + nf(susTime, 1, 1) + '\n재생주기: ' + nf(soundLoop.interval, 1, 1), width/2, height/2);
+  index = (index + 1) % sclaes.length;		// index = 0∼7 순으로 반복
+}

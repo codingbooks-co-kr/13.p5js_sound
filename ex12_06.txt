@@ -1,0 +1,102 @@
+// 신경망 회귀(Neural Network Regression)를 이용한 주파수 연속 추정
+// 주파수 영역을 학습 후 캔버스상에서 마우스를 움직이면 추정된 주파수음 연속 출력
+
+let model, monoSynth, d, slider, state = 'training';
+let info = '1.마우스를 눌러 데이터 수집, 2.슬라이더로 데이터 변경';
+let myFreq = 0, startFreq = 300, endFreq = 500, step = 100;
+
+function setup() {
+  let canvas = createCanvas(500, 500);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성
+  
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.position(0, height+10);			// 텍스트 출력 위치 설정
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  slider = createSlider(startFreq, endFreq, startFreq, step);
+  slider.position(0, height+40);			// 슬라이더 위치 설정
+  slider.size(width);				// 슬라이더 크기 설정
+  
+  let button1 = createButton('모델학습'); 	// 버튼 생성 (버튼 레이블은 '모델학습')
+  button1.position(0, height+70); 		// 버튼 위치 설정
+  button1.size(120, 50); 			// 버튼 크기 설정
+  button1.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button1.mousePressed(trainModel); 		// 버튼 누르면 trainModel() 자동 호출
+  
+  let button2 = createButton('모델저장'); 	// 버튼 생성 (버튼 레이블은 '모델저장')
+  button2.position(130, height+70); 		// 버튼 위치 설정
+  button2.size(120, 50); 			// 버튼 크기 설정
+  button2.style('font-size', '20px');		// 버튼 폰트 크기를 (20픽셀로) 설정
+  button2.mousePressed(saveModel); 		// 버튼 누르면 saveModel() 자동 호출
+
+  let options = {				// 객체리터럴로 객체(options) 생성
+    inputs: ['x', 'y'],				// 키(inputs): 값('x', 'y' 좌표 배열)
+    outputs: ['frequency'],			// 키(outputs): 값('frequency' 배열)
+    task: 'regression',				// 수행하려는 작업의 유형: 'regression'
+    debug: false				// 학습 과정을 그래프로 시각화: true
+  };
+  model = ml5.neuralNetwork(options);	// neuralNetwork 객체(model) 생성
+
+  background(200);
+  colorMode(HSB);				// HSB 컬러모드 
+}
+
+function draw() {
+  d.html(info);					// 문자열(info) 출력
+  myFreq = slider.value();			// 슬라이더 값 읽기
+  if (state == 'prediction') {			// ❸학습 종료 후 추정 시 if문은 참
+    let inputs = { x: mouseX, y: mouseY };	// 입력 데이터 객체(inputs) 생성
+    model.predict(inputs, getResult);		// 추정: inputs 주어지면 getResult() 자동 호출
+  }
+}
+
+function canvasPressed() {			// 콜백함수: 캔버스 누를 때 호출
+  if (state === 'training') {			// ❶학습: 초기 실행 시 if문은 참
+    let inputs = { x: mouseX, y: mouseY };	// 입력 데이터 객체(inputs) 생성
+    let outputs = { frequency: myFreq };	// 출력 레이블 객체(outputs) 생성
+    model.addData(inputs, outputs);		// model에 입·출력 데이터 객체 추가
+    monoSynth.play(myFreq, 1, 0, 0.3);	// 모델 학습 시 입력 데이터의 주파수음 출력
+    
+    fill(0);
+    textSize(20);
+    text(myFreq, mouseX, mouseY);		// 입력 데이터를 주파수(myFreq)로 표시
+    info = '수집 데이터: ' + myFreq + 'Hz';
+  }
+}
+
+function trainModel() {				// 콜백함수: '모델학습' 버튼 누를 때 호출
+  model.normalizeData();			// 데이터 정규화(0∼1)
+  let options = { epochs: 50 };		// options 객체 생성 (학습횟수: 50회)
+  model.train(options, training, finished);	// 신경망 학습(옵션, 콜백함수, 콜백함수)
+}
+
+function training(epoch, loss) {			// 콜백함수: 신경망 학습 중 호출
+  info = '학습중: ' + epoch;
+}
+
+function finished() {				// 콜백함수: 신경망 학습 완료 시 호출
+  state = 'prediction';				// ❷추정: 학습 완료 후 추정
+}
+
+function getResult(error, results) {		// 콜백함수: 학습완료 후 분류 시 호출
+  if (error) {					// 인식 오류 시
+    console.log(error);				// 또는 console.error(error);
+    return;					// 함수 실행 종료
+  }
+  let result = int(results[0].value);		// 추정 주파수값(실수)을 정수로 변환
+  info = '추정주파수: ' + result + 'Hz';
+  monoSynth.play(result, 1, 0, 0.3);		// 추정 주파수음 출력
+  
+  let h = map(result, startFreq, endFreq, 0, 240);
+  fill(h, 100, 100);				// S(채도)와 B(밝기)가 100%일 때 색상(H) 설정
+  ellipse(mouseX, mouseY, 35, 35);		// 출력을 원으로 표시
+  
+  fill(0);
+  textAlign(CENTER, CENTER);
+  text(result, mouseX, mouseY);		// 추정 주파수값 표시
+}
+
+function saveModel() {				// 콜백함수: '모델저장' 버튼 누를 때 호출
+  model.save();					// 학습 완료된 모델 저장
+}

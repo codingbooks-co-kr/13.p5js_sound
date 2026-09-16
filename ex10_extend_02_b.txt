@@ -1,0 +1,28 @@
+// 사운드파일 객체와 필터링 객체 연결-2
+
+let soundFile, myFilter;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');
+}
+
+function setup() {
+  let canvas = createCanvas(400, 100);
+  canvas.mousePressed(canvasPressed);
+
+  myFilter = new p5.Filter('lowpass');
+  
+  soundFile.disconnect();	// 연결해제
+  soundFile.connect(myFilter);	// 연결
+  myFilter.process(soundFile, 500);
+  
+  background(200);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('음원의 필터링(LPF)', width/2, height/2);
+}
+
+function canvasPressed() {
+  soundFile.playMode('restart');
+  soundFile.play();
+}

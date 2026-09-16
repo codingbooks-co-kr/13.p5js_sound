@@ -1,0 +1,40 @@
+// 사운드 파일 재생 시 캔버스상에서 마우스의 좌우 위치에 따라 지연효과 변화
+
+let soundFile, myDelay;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  soundFile.disconnect();			// soundFile 객체의 출력 연결 해제
+  soundFile.play();				// 사운드 파일 재생
+
+  myDelay = new p5.Delay();			// p5.Delay 객체(myDelay) 생성
+  myDelay.connect();				// myDelay 객체를 메인출력(→스피커)에 연결
+  myDelay.process(soundFile, 0.2, 0.7, 2000);	// 음원, 지연시간, 피드백, LPF 차단주파수
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);
+  stroke(255, 255, 0);
+  line(x, 0, x, height);				// 마우스를 따라오는 선
+
+  let pos = map(x, 0, width, 0, 1);
+  myDelay.drywet(pos);				// 0∼1 (0:지연없음, 1:지연최대)
+  
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('마우스의 좌우 위치에 따라 지연효과 변화', 10, 30);
+  text('Dry/Wet: ' + int(pos * 100) + '%', 10, 60);
+}
+
+function canvasPressed() {			// 콜백함수
+  soundFile.playMode('restart');			// 이전 재생을 중지하고 다시 시작하는 모드
+  soundFile.play();				// 사운드 파일 재생
+}

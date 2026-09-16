@@ -1,0 +1,55 @@
+// p5.js: 버튼값 수신 후 사운드 파일의 재생/일시정지 제어, 사운드 음량값 송신
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let soundFile, myAmp, level = 0;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3'); 	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  createCanvas(500, 500);
+  port.getPorts();			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton);	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort);	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent);		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+
+  myAmp = new p5.Amplitude();	// p5.Amplitude 객체(myAmp) 생성
+}
+
+function draw() {
+  background(0, 10);				// 페이딩 효과
+  level = myAmp.getLevel();			// 사운드 샘플 음량값(0∼1) 구하기 
+  let myLevel = map(level, 0, 1, 10, 500);	// 사운드 샘플 음량값 범위 변경
+
+  noStroke();					// 원의 외곽선 제거 (부드러운 페이딩 효과)
+  fill(255, 255, 0);
+  ellipse(width/2, height/2, myLevel, myLevel);	// 사운드 샘플 음량값 = 원의 크기
+}
+
+function serialEvent() {				// 콜백함수: 수신값이 있으면 자동 호출
+  let playing = port.read();			// 수신 (버튼값: 0 또는 1)
+  if (playing === 0) {
+    soundFile.pause();				// 사운드 파일 일시 정지
+  } else if (playing === 1) {
+    soundFile.playMode('untilDone'); 		// 모드 설정: 재생 중이 아닌 경우에만 재생
+    soundFile.loop();				// 사운드 파일 반복 재생
+  } 
+  let myLevel = int(map(level, 0, 1, 0, 255));	// 음량값을 1바이트 범위(0∼255)로 변환
+  port.write(myLevel);  			// 송신 (음량값: 0∼255)
+}
+
+function makePortButton() {			// 포트 첫 연결 시 포트 선택 버튼 생성
+  let portButton = createButton('포트 선택');	// 버튼 생성
+  portButton.mousePressed(choosePort);	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort();				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수
+  port.open().then(initiateSerial);		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

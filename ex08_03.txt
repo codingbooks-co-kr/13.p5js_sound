@@ -1,0 +1,38 @@
+// 슬라이더로 주전원(Epicycles) 생성
+
+let d, slider, theta = 0;
+
+function setup() {
+  createCanvas(600, 600);
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  slider = createSlider(1, 30, 1, 1);	// 슬라이더 생성 (범위:1∼30, 초깃값:1, 스텝크기:1)
+  slider.size(width);			// 슬라이더 크기 설정
+}
+
+function draw() {
+  background(0);
+  let num = slider.value();		// 슬라이더 값 읽기
+  d.html('Epicycles 개수: ' + num);
+  
+  translate(width/2, height/2);		// 원점 좌표 이동: (0, 0) → (width/2, height/2)
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < num; i++) {	// 주전원 num개 그리기
+    let n = i + 1;			// n: 하모닉 주파수
+    let radius = 100 / n;		// radius: 하모닉 성분의 크기
+    
+    let prevX = x;
+    let prevY = y;
+    stroke(255);
+    strokeWeight(2);
+    noFill();
+    ellipse(prevX, prevY, radius*2, radius*2);	// 주전원 그리기
+
+    x += radius * cos(n * theta);
+    y += radius * sin(n * theta);
+    line(prevX, prevY, x, y);			// 주전원의 중심과 원주를 회전하는 선
+  }
+  theta += 0.05;
+}

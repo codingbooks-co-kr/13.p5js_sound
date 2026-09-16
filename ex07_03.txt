@@ -1,0 +1,30 @@
+// 캔버스를 눌러 미디음 랜덤 재생 (→3∼7옥타브 범위의 C3∼B7, 미디번호 48∼107에 해당)
+// [심화7.3] “음이름으로 코딩 시 유의점” 참고
+
+let monoSynth, midiNum = 0, myFreq = 0, currentNote = '없음';
+let sclaes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성
+
+  textSize(25);
+  textAlign(CENTER, CENTER); 
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  text('미디: ' + midiNum + ' 주파수: ' + nf(myFreq, 3, 1) + 'Hz 음이름: ' + currentNote, width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  midiNum = int(random(48, 108));		// 랜덤 미디음 범위: 'C3'(48)∼'B7'(107)
+  myFreq = midiToFreq(midiNum);		// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, 0, 0.3);		// 음 재생
+  
+  let note = sclaes[midiNum % 12];		// 음이름
+  let octave = int(midiNum / 12) - 1;		// 옥타브
+  currentNote = note + octave;		// 음이름+옥타브 예: E4, C6, A#3
+}

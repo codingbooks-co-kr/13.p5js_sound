@@ -1,0 +1,58 @@
+// 원주상을 회전하며 두 개의 리듬 생성
+
+let r1Num = 60, r1 = [0, 90, 180, 270];	// r1: 각도로 구성된 “도“(C4) 리듬배열
+let r2Num = 64, r2 = [0, 150, 300];		// r2: 각도로 구성된 “미“(E4) 리듬배열
+let slider, polysynth, radius = 150, angle = 0, speed = 0;
+
+function setup() { 
+  createCanvas(500, 500);
+  polySynth = new p5.PolySynth();		// p5.PolySynth 객체(polySynth) 생성
+  slider = createSlider(0, 5, 3, 0.1);		// 슬라이더 생성(범위:0∼5, 초깃값:3, 스텝:0.1)
+  slider.size(width);				// 슬라이더 크기 설정
+  angleMode(DEGREES);			// DEGREES 모드 설정 (0o∼360o 범위)
+}
+
+function draw() {
+  background(0);
+  speed = slider.value();			// 슬라이더값(=회전속도) 읽기
+  translate(width/2, height/2);			// 좌표 이동: [심화5.6]의 설명 참조
+  
+  noFill();
+  stroke(255);
+  strokeWeight(2);
+  ellipse(0, 0, radius*2, radius*2);
+  
+  for (let i = 0; i < r1.length; i++) {		// 리듬(r1)을 원주상의 작은 원으로 표시
+    let x = radius * cos(r1[i]);
+    let y = radius * sin(r1[i]);
+    ellipse(x, y, 20, 20);
+  } 
+  
+  for (let i = 0; i < r2.length; i++) {		// 리듬(r2)을 원주상의 작은 원으로 표시
+    let x = radius * cos(r2[i]);
+    let y = radius * sin(r2[i]);
+    ellipse(x, y, 30, 30);
+  }
+  
+  for (let i = 0; i < r1.length; i++) {		// 리듬(r1) 배열요소를 순차 재생
+    if(angle >= r1[i] && angle < r1[i]+speed) {
+      let myFreq = midiToFreq(r1Num);
+      polySynth.play(myFreq, 1, 0, 0.05);
+    }
+  }
+  
+  for (let i = 0; i < r2.length; i++) {		// 리듬(r2) 배열요소를 순차 재생
+    if(angle >= r2[i] && angle < r2[i]+speed) {
+      let myFreq = midiToFreq(r2Num);
+      polySynth.play(myFreq, 1, 0, 0.05);
+    }
+  }
+  
+  let x = radius * cos(angle);
+  let y = radius * sin(angle);
+  line(0, 0, x, y);				// 회전하는 선
+  fill(0, 255, 0);
+  ellipse(x, y, 10, 10);				// 회전하는 작은 원
+  
+  angle = (angle + speed) % 360;		// 회전 각속도 증가, 360도마다 반복
+}

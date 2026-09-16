@@ -1,0 +1,24 @@
+// frameCount를 사용한 음 순차 재생
+
+let polySynth, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  createCanvas(500, 200);
+  polySynth = new p5.PolySynth();			// p5.PolySynth 객체 생성
+
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  if (frameCount % 30 == 0) {				// 0.5초마다 if문은 true가 됨
+    let myFreq = midiToFreq(sclaes[index]);		// 미디번호를 주파수로 변환
+    polySynth.play(myFreq, 1, 0, 0.3);			// 음 재생
+
+    background(0);
+    text('미디번호: ' + sclaes[index] + ', 주파수: ' + int(myFreq) + 'Hz', width/2, height/2);
+    index = (index + 1) % sclaes.length;		// index = 0∼7 순으로 반복
+  }
+}

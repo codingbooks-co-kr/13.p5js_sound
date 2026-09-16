@@ -1,0 +1,36 @@
+// 마우스의 상하좌우 움직임에 따른 주파수 및 진폭 변화를 파형으로 표시
+
+let osc, fft, d;
+
+function setup() {
+  createCanvas(500, 200);
+  osc = new p5.Oscillator('sine');	// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.start();				// 오실레이터 시작
+  fft = new p5.FFT();			// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+  
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);
+  let myFreq = map(x, 0, width, 200, 500);
+  osc.freq(myFreq);			// 오실레이터의 주파수 설정
+  
+  let y = constrain(mouseY, 0, height);
+  let myAmp = map(y, 0, height, 1, 0);
+  osc.amp(myAmp, 0.1);		// 볼륨(음량|진폭)이 0.1초 동안 지속되는 페이드 생성
+  
+  let wave = fft.waveform();		// 시간 영역의 진폭값 배열 반환
+  stroke(255);				// 파형 선 색상
+  noFill();				// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();				// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();				// 시간 파형 그리기 종료
+  d.html('주파수: ' + nf(myFreq, 3, 1) + 'Hz, 진폭: ' + nf(myAmp, 1, 2));
+}

@@ -1,0 +1,29 @@
+// 캔버스를 누를 때마다 사운드가 재생 또는 정지 (콜백함수 사용) 
+
+let soundFile;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3'); 	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  background(0);
+  fill(255);
+  textSize(30);
+  textAlign(CENTER, CENTER);
+  text('캔버스를 눌러 시작하세요', width/2, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  background(0);
+  if (soundFile.isPlaying()) {			// 사운드가 재생 중인 경우 true를 반환
+    soundFile.stop();				// 사운드 파일 재생 정지
+    text('사운드 정지', width/2, height/2);
+  } else {					// 사운드가 재생되고 있지 않은 경우
+    soundFile.play();				// 사운드 파일 재생
+    text('사운드 재생', width/2, height/2);
+  }
+}

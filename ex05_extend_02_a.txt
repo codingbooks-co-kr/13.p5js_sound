@@ -1,0 +1,19 @@
+// 방법1: 크롬의 자동 재생 제한 시뮬레이션 및 마우스를 눌러 재생 시작
+
+let soundFile;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  getAudioContext().suspend();			// 오디오 자동 재생 제한 시뮬레이션
+  console.log(getAudioContext().state);		// 자동재생을 제한하면 'suspended' 출력
+  soundFile.play();				// 실행 초기 사운드 파일 자동 재생
+}
+
+function mousePressed() {			// 마우스를 누르면 오디오 재생
+  if (getAudioContext().state !== 'running') {	// 현재 오디오가 재생되고 있지 않는 경우
+    getAudioContext().resume();		// 오디오 재생 시작, 또는 userStartAudio();
+  }
+}

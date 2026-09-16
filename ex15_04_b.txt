@@ -1,0 +1,58 @@
+// p5.js: 가변저항값 수신 후 오실레이터의 주파수 제어
+
+let port = new p5.WebSerial();		// 시리얼 통신 객체 생성
+let osc, fft, d, myFreq = 0;
+
+function setup() {
+  createCanvas(500, 200);
+  port.getPorts();			// 포트 사용 가능 여부 확인
+  port.on('noport', makePortButton);	// 기존 선택한 포트가 없으면 makePortButton() 호출
+  port.on('portavailable', openPort);	// 사용 가능한 포트가 있으면 openPort() 자동 호출
+  port.on('data', serialEvent);		// 데이터 수신: ‘data’ 이벤트 발생→serialEvent() 호출
+
+  osc = new p5.Oscillator('sine');	// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.start();				// 오실레이터 시작
+
+  fft = new p5.FFT();			// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+  
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+}
+
+function draw() {
+  background(0);
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+  d.html('주파수: ' + nf(int(myFreq), 3) + 'Hz');
+  
+  let wave = fft.waveform();			// 시간 영역의 진폭값 배열 반환
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 시간 파형 그리기 종료
+}
+
+function serialEvent() {				// 콜백함수: 수신값이 있으면 자동 호출
+  let val = port.read();				// 수신 (정수: 0∼255)
+  myFreq = map(val, 0, 255, 200, 500);	// 주파수 범위: 200∼500Hz
+  port.write('B');        			// 송신 (통신제어신호: 'B')
+}
+
+function makePortButton() {			// 포트 첫 연결 시 포트 선택 버튼 생성
+  let portButton = createButton('포트 선택');	// 버튼 생성
+  portButton.mousePressed(choosePort);	// 버튼 누르면 choosePort() 자동 호출
+  function choosePort() {			// 콜백함수
+    port.requestPort();				// 시리얼 포트 선택창 오픈
+  }
+}
+
+function openPort() {				// 콜백함수
+  port.open().then(initiateSerial);		// 포트를 오픈 후 initiateSerial() 자동 호출
+  function initiateSerial() {			// 콜백함수
+    console.log('포트 오픈');
+  }
+}

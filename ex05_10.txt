@@ -1,0 +1,35 @@
+// 사운드 재생 진행바 (캔버스를 누를 때마다 사운드가 재생 및 일시 정지)
+
+let soundFile;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3'); 	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  text(int(soundFile.currentTime()) + ' / ' + int(soundFile.duration()) + ' sec', width/2, height/2);
+  rect(100, 120, 300, 20);		// 사운드 총재생시간을 흰색 사각형 너비(300)로 표시
+
+  let pos = map(soundFile.currentTime(), 0, soundFile.duration(), 0, 300);
+  fill(255, 0, 0);
+  rect(100, 120, pos, 20);		// 진행바를 빨간색 사각형으로 표시
+}
+
+function canvasPressed() {		// 콜백함수: 캔버스를 누를 때마다 재생/일시정지 토글
+  if (soundFile.isPlaying()) {		// 사운드가 재생 중인 경우 true를 반환
+    soundFile.pause();			// 사운드 재생 일시 중지
+  } else {				// 사운드가 재생되고 있지 않은 경우
+    soundFile.loop();			// 사운드 파일 무한 반복 재생
+  }
+}

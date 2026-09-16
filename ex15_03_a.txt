@@ -1,0 +1,26 @@
+// 아두이노: 수신된 주파수와 지속시간으로 부저 제어
+
+#define BUZZER 13
+
+void setup() {
+  pinMode(BUZZER, OUTPUT);
+  Serial.begin(9600);
+  while (Serial.available() == 0) {	// 수신 버퍼에 수신값이 없는 동안 반복 실행
+    Serial.write('A');			// 시작신호('A') 전송
+    delay(300);				// 0.3초 대기
+  }
+}
+
+void loop() { }
+
+void serialEvent() {				// 이벤트함수: 수신값이 있으면 자동 호출
+  int freq = Serial.readStringUntil(' ').toInt();	// 수신 (첫 공백까지의 문자열→정수 변환)
+  int time = Serial.readStringUntil('\n').toInt();	// 수신 (공백∼개행사이의 문자열→정수 변환)
+  if (freq == 0) {
+    noTone(BUZZER);			// 무음
+  } else {
+    tone(BUZZER, freq, time);		// 수신 주파수음 출력
+    delay(time);			// 지연시간
+  }
+  Serial.write('B');        		// 송신 (통신제어신호: 'B')
+}

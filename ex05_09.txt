@@ -1,0 +1,42 @@
+// 캔버스상에서 사운드 전체 파형을 표시하고 마우스를 누르면 누른 지점부터 사운드가 재생
+
+let soundFile, peaks;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3'); 	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  background(0);
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  peaks = soundFile.getPeaks();		// peaks: 사운드 파일의 진폭 피크 배열
+}
+
+function draw() {
+  background(0);
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 사운드 피크 파형 그리기 시작
+  for (i = 0; i < peaks.length; i++) {		// peaks.length: 캔버스창너비*5=2500
+    let x = map(i, 0, peaks.length, 0, width);	// x: 시간
+    let y = map(peaks[i], -1, 1, height, 0);	// y: 사운드 피크
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 사운드 피크 파형 그리기 종료
+  
+  // 사운드 진행 x축 위치 좌표(→pos) 알아내기
+  let pos = map(soundFile.currentTime(), 0, soundFile.duration(), 0, width);
+
+  // 사운드 진행 선 그리기
+  stroke(0, 255, 0);
+  line(pos, 0, pos, height);
+}
+
+// 캔버스상에서 마우스를 누른 위치로 재생 헤드 이동
+function canvasPressed() {			// 콜백함수
+  let posTime = map(mouseX, 0, width, 0, soundFile.duration());
+  soundFile.jump(posTime);			// 재생 헤드를 posTime으로 이동
+}

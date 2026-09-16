@@ -1,0 +1,46 @@
+// 마우스의 좌우 움직임으로 BPM 변경, 캔버스를 누른 지점의 BPM 속도로 음 랜덤 재생
+
+let monoSynth, soundLoop, bpm;
+let sclaes = [60, 62, 64, 65, 67, 69, 71, 72];		// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  soundLoop = new p5.SoundLoop(onSoundLoop);	// 사운드처리 콜백함수 반복 호출
+
+  textSize(30);
+  textAlign(CENTER, CENTER);
+}
+
+function draw() {
+  background(0);
+  let x = constrain(mouseX, 0, width);
+  bpm = int(map(x, 0, width, 60, 180));	// 변환된 최종 bpm 범위: 60∼180
+  
+  noStroke();
+  fill(255);
+  text('BPM: ' + nf(bpm, 3), width/2, height/2);
+  
+  noFill();
+  stroke(255);
+  ellipse(x, height/2, 50, height);		// 마우스의 좌우 움직임을 따라오는 원
+}
+
+function keyPressed() {				// 이벤트함수
+  soundLoop.stop();				// 사운드처리 콜백함수의 호출 정지
+}
+
+function canvasPressed() {			// 콜백함수
+  soundLoop.interval = 60 / bpm;		// 주기적인 콜백함수의 호출 시간 간격
+  if (!soundLoop.isPlaying) {			// 사운드처리 콜백함수의 호출이 정지된 경우
+    soundLoop.start();				// 사운드처리 콜백함수를 반복 호출 시작
+  } 
+}
+
+function onSoundLoop(time) {			// 콜백함수
+  let note = random(sclaes);			// 배열요소 중 랜덤 미디번호 반환
+  let myFreq = midiToFreq(note);		// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, time, 0.3);	// 음 재생
+}

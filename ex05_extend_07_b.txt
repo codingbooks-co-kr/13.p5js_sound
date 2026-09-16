@@ -1,0 +1,83 @@
+// 사운드 파일 재생/정지/속도/음량/팬 제어
+
+let soundFile, d, peaks, slider1, slider2, slider3, button;
+
+function preload() {
+  soundFile = loadSound('data/latin.mp3');	// soundFile 객체 생성 및 초기화(파일 로딩)
+}
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  d = createDiv('');				// 브라우저 화면에서 텍스트 출력
+  d.style('font-size', '20px');			// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  slider1 = createSlider(0, 2, 1, 0.1);		// 범위(0∼2), 초깃값(1), 스텝크기(0.1)
+  slider1.position(0, height+30); 		// 슬라이더 위치 설정
+  slider1.size(width); 				// 슬라이더 크기 설정
+  
+  slider2 = createSlider(0, 1, 0.5, 0.1);	// 범위(0∼1), 초깃값(0.5), 스텝크기(0.1)
+  slider2.position(0, height+50); 		// 슬라이더 위치 설정
+  slider2.size(width); 				// 슬라이더 크기 설정
+  
+  slider3 = createSlider(-1, 1, 0, 0.1);		// 범위(-1∼1), 초깃값(0), 스텝크기(0.1)
+  slider3.position(0, height+70); 		// 슬라이더 위치 설정
+  slider3.size(width); 				// 슬라이더 크기 설정
+  
+  button = createButton('정지'); 		// 버튼 생성 (초기 버튼 레이블은 '정지')
+  button.position(0, height+90); 		// 버튼 위치 설정
+  button.size(100, 50); 			// 버튼 크기 설정
+  button.style('font-size', '20px'); 		// 버튼 폰트 크기(20픽셀) 설정
+  button.mousePressed(controlAudio); 		// 버튼 누르면 controlAudio() 자동 호출
+  
+  soundFile.loop();				// 사운드 파일 무한 반복 재생
+  peaks = soundFile.getPeaks();		// peaks: 사운드 파일의 진폭 피크 배열
+  //console.log('peaks 배열 크기: ' + peaks.length);
+}
+
+function draw() {
+  background(0);
+  stroke(255);					// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 사운드 피크 파형 그리기 시작
+  for (i = 0; i < peaks.length; i++) {		// peaks.length=캔버스창너비*5=2500
+    let x = map(i, 0, peaks.length, 0, width);	// x: 시간
+    let y = map(peaks[i], -1, 1, height, 0);	// y: 사운드 피크
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 사운드 피크 파형 그리기 종료
+  
+  // 사운드 진행 x축 위치 좌표(→pos) 알아내기
+  let pos = map(soundFile.currentTime(), 0, soundFile.duration(), 0, width);
+
+  stroke(0, 255, 0);
+  line(pos, 0, pos, height);			// 사운드 진행선 그리기
+  
+  let rateValue = slider1.value();
+  soundFile.rate(rateValue);			// 재생 속도 설정
+  
+  let volumeValue = slider2.value();
+  soundFile.setVolume(volumeValue);		// 재생 음량 설정
+  
+  let panValue = slider3.value();
+  soundFile.pan(panValue);			// 스테레오 음원 위치 설정
+  
+  d.html('속도 = ' + nf(rateValue, 1, 1) + ' 음량 = ' + nf(volumeValue, 1, 1) + ', 팬 = ' + nf(panValue, 1, 1));
+}
+
+// 캔버스상에에서 마우스를 누른 위치로 재생 헤드 이동
+function canvasPressed() {		// 콜백함수
+  let posTime = map(mouseX, 0, width, 0, soundFile.duration());
+  soundFile.jump(posTime);		// 재생 헤드를 posTime으로 이동
+}
+
+function controlAudio() {		// 콜백함수
+  if (!soundFile.isPlaying()) {
+    soundFile.loop();			// 사운드 파일 무한 반복 재생
+    button.html('정지');			// 버튼 레이블을 '정지'로 변경
+  } else {
+    soundFile.pause(); 			// 사운드 파일의 재생 일시 정지
+    button.html('재생');			// 버튼 레이블을 '재생'으로 변경
+  }
+}

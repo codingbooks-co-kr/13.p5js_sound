@@ -1,0 +1,60 @@
+// 톱니파 생성 (슬라이더로 주전원 개수, 각속도, 진폭 조절)
+
+let d, slider1, slider2, slider3, theta = 0, wave = [];
+
+function setup() {
+  createCanvas(700, 300);
+  d = createDiv('');			// 브라우저 화면에서 텍스트 출력(초기 텍스트 없음)
+  d.style('font-size', '20px');		// 텍스트 폰트 크기를 (20픽셀로) 설정
+  
+  slider1 = createSlider(1, 30, 1, 1);	// 슬라이더 생성 (범위:1∼30, 초깃값:1, 스텝크기:1)
+  slider1.size(width);			// 슬라이더 크기 설정
+  slider2 = createSlider(0.01, 0.1, 0.05, 0.01);
+  slider2.size(width);
+  slider3 = createSlider(30, 100, 80, 1);
+  slider3.size(width);
+}
+
+function draw() {
+  background(0);
+  let num = slider1.value();		// 주전원 개수 읽기
+  let mySpeed = slider2.value();	// 각속도(=회전속도) 읽기
+  let myAmp = slider3.value();		// 진폭값 읽기
+  
+  d.html('Epicycles 개수: ' + num + ' 속도: ' + mySpeed + ' 진폭: ' + myAmp);
+  translate(150, height/2);		// ❶ 좌표이동: x=150, y=height/2
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < num; i++) {	// 주전원 num개 그리기
+    let n = i + 1;			// n: 하모닉 주파수
+    let radius = myAmp / n;		// 진폭은 주전원의 크기와 비례관계
+
+    let prevX = x;
+    let prevY = y;
+    stroke(255);
+    strokeWeight(2);
+    noFill();
+    ellipse(prevX, prevY, radius*2, radius*2);	// 주전원 그리기
+
+    x += radius * cos(n * theta);
+    y += radius * sin(n * theta);
+    line(prevX, prevY, x, y);		// 주전원의 중심과 원주를 회전하는 선
+  }
+  wave.unshift(y);			// wave[] 배열의 맨 앞에 새로운 요소 추가
+  stroke(255, 0, 0);
+  line(x, y, 200, y);			// 동일코드: line(x, wave[0], 200, wave[0]);
+  
+  translate(200, 0);			// ❷ 좌표이동 누적: x=150+200=350, y=height/2
+  stroke(0, 255, 0);			// 파형 선 색상
+  noFill();				// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();				// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {
+    vertex(i, wave[i]);
+  }
+  endShape();				// 시간 파형 그리기 종료
+  
+  if (wave.length > 350) {		// wave 배열의 크기: 350	
+    wave.pop();			// 배열의 끝 요소 삭제
+  }
+  theta += mySpeed;			// 각속도(=회전속도) 누적
+}

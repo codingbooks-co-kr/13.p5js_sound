@@ -1,0 +1,32 @@
+// 키보드상의 특정 키('1234567890-=')를 눌러 미디음 재생
+
+let monoSynth, midiNum = 0, baseNote = 60	// 60은 “C4”(→Middle C)
+let keyOrder = '1234567890-=';		// 문자열의 요소수: 12개
+
+function setup() {
+  createCanvas(500, 200);
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  textSize(20);
+  text('키(1234567890-=)를 눌러 미디음 재생', 20, 40);
+
+  textSize(30);
+  text('미디번호: ' + midiNum, 180, 120);
+}
+
+function keyPressed() {
+  let keyIndex = keyOrder.indexOf(key);	// 키 입력문자를 문자열에서 검색, 인덱스 반환
+  if (keyIndex >= 0) {				// 키 입력문자가 문자열에 있는 경우
+    midiNum = baseNote + keyIndex;		// midiNum = 60 + (0∼11) → 60∼71
+    let myFreq = midiToFreq(midiNum);	// 미디번호를 주파수로 변환
+    monoSynth.triggerAttack(myFreq, 1, 0);	// 포락선의 Attack 및 Decay를 트리거
+  }
+}
+
+function keyReleased() {
+  monoSynth.triggerRelease();			// 포락선의 Release를 트리거
+}

@@ -1,0 +1,46 @@
+// 1번키를 누르면 지연효과 없는 사인파형 출력, 2번키를 누르면 지연효과 적용된 사인파형 출력
+
+let env, osc, myDelay, fft;
+
+function setup() {
+  createCanvas(500, 200);
+  env = new p5.Envelope();		// p5.Envelope 객체(env) 생성
+  env.setADSR(0.01, 0.2, 0.3, 0.1);	// 어택시간, 감쇠시간, 지속속도, 릴리즈시간 설정
+  env.setRange(1, 0);			// 생략가능(기본값): attackLevel=1, releaseLevel=0
+  
+  osc = new p5.Oscillator('sine');	// p5.Oscillator 객체(osc) 생성 및 유형(사인파) 설정
+  osc.freq(440);			// 오실레이터의 초기 주파수 설정(440Hz)
+  osc.amp(env);			// 오실레이터의 진폭 설정 시 ADSR 포락선 적용
+  osc.start();				// 오실레이터 시작
+  
+  myDelay = new p5.Delay();			// p5.Delay 객체(myDelay) 생성
+  fft = new p5.FFT();				// 파형 표시를 위해 p5.FFT 객체(fft) 생성
+}
+
+function draw() {
+  background(0);
+  let wave = fft.waveform();			// 시간 영역의 진폭값 배열 반환
+  stroke(255, 255, 0);				// 파형 선 색상
+  noFill();					// 꼭지점 연결 도형의 채움 색상 없음
+  beginShape();					// 시간 파형 그리기 시작
+  for (let i = 0; i < wave.length; i++) {	// 기본값: wave.length=1024
+    let x = map(i, 0, wave.length, 0, width);	// x: 시간
+    let y = map(wave[i], -1, 1, height, 0);	// y: 진폭
+    vertex(x, y);				// 꼭지점
+  }
+  endShape();					// 시간 파형 그리기 종료
+}
+
+function keyPressed() {
+  if (key === '1') {
+    myDelay.disconnect();			// myDelay 객체의 출력 연결 해제
+    osc.connect();				// osc 객체를 메인출력(→스피커)에 연결
+    env.play();					// ADSR 포락선 음원의 재생
+  } 
+  if (key === '2') {
+    osc.disconnect();				// osc 객체의 출력 연결 해제
+    myDelay.connect();				// myDelay 객체를 메인출력(→스피커)에 연결
+    myDelay.process(osc, 0.2, 0.7, 2000);	// 음원, 지연시간, 피드백, LPF 차단주파수
+    env.play();					// ADSR 포락선 음원의 재생
+  }
+}

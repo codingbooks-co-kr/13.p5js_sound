@@ -1,0 +1,38 @@
+// 캔버스를 누를 때마다 C3∼B7 범위(→미디번호 48∼107에 해당)의 음을 랜덤 재생
+// p5.Envelope 객체를 사용하여 ADSR 포락선의 사인파 오실레이터 사용
+
+let env, osc, midiNum1 = 0, midiNum2 = 0, myFreq = 0, currentNote = '없음';
+let sclaes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+
+  env = new p5.Envelope();		// p5.Envelope 객체(env) 생성
+  env.setADSR(0.01, 0.2, 0.3, 0.4);	// 어택시간, 감쇠시간, 지속속도, 릴리즈시간 설정
+  env.setRange(1, 0);			// 생략가능(기본값): attackLevel=1, releaseLevel=0
+
+  osc = new p5.Oscillator('sine');	// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.amp(env);			// 오실레이터의 진폭 설정 시 ADSR 포락선 적용
+  osc.start();				// 오실레이터 시작
+}
+
+function draw() {
+  background(0);
+  fill(255);
+  textSize(25);
+  text('미디: ' + midiNum1 + ' ' + midiNum2 + ' 주파수: ' + nf(int(myFreq), 3) + 'Hz 음이름: ' + currentNote, 30, height/2);
+}
+
+function canvasPressed() {			// 콜백함수
+  midiNum1 = int(random(48, 108));		// 랜덤 미디음 범위: 'C3'(48)∼'B7'(107)
+  myFreq = midiToFreq(midiNum1);		// 미디번호 → 주파수 변환
+  midiNum2 = freqToMidi(myFreq);		// 주파수 → 미디번호 변환
+ 
+  osc.freq(myFreq);				// 오실레이터의 주파수 설정
+  env.play();					// ADSR 포락선 음원의 재생
+  
+  let note = sclaes[midiNum2 % 12];		// 음높이 구하기 ([질문7.3] 설명 참조)
+  let octave = int(midiNum2 / 12) - 1;	// 옥타브 구하기 ([질문7.3] 설명 참조)
+  currentNote = note + octave;		// 음이름+옥타브 예: E4, C6, A#3
+}

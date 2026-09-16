@@ -1,0 +1,39 @@
+// 마우스를 누를 때마다 주전원(Epicycles) 생성
+
+let num = 1, theta = 0;
+
+function setup() {
+  createCanvas(600, 600);
+}
+
+function draw() {
+  background(0);
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('Epicycles 개수: ' + num, 20, 40);
+
+  translate(width/2, height/2);			// 원점좌표이동: (0, 0) → (width/2, height/2)
+  let x = 0;
+  let y = 0;
+  for (let i = 0; i < num; i++) {		// 주전원 num개 그리기
+    let n = i + 1;				// n: 하모닉 주파수
+    let radius = 100 / n;			// radius: 하모닉 성분의 크기
+    
+    let prevX = x;
+    let prevY = y;
+    stroke(255);
+    strokeWeight(2);
+    noFill();
+    ellipse(prevX, prevY, radius*2, radius*2);	// 주전원 그리기
+
+    x += radius * cos(n * theta);
+    y += radius * sin(n * theta);
+    line(prevX, prevY, x, y);			// 주전원의 중심과 원주를 회전하는 선
+  }
+  theta += 0.05;
+}
+
+function mousePressed() {			// 마우스를 누를 때마다 num 증가
+  num++;
+}

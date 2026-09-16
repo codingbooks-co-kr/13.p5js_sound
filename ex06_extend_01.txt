@@ -1,0 +1,98 @@
+// ADSR 포락선의 시각화 시뮬레이션
+
+let env, osc, attack_time, attack_level, decay_time, sustain_time, sustain_level, release_time, release_level;
+let attackTime = 0.1, attackLevel = 2.0, decayTime = 0.5, sustainTime = 0.5, sustainLevel = 0.5, releaseTime = 0.5, releaseLevel = 0.0;
+let maxTime = 1, maxLevel = 5;
+
+function setup() {
+  createCanvas(400, 200);
+  env = new p5.Envelope();			// p5.Envelope 객체(env) 생성
+  osc = new p5.Oscillator('sine');		// p5.Oscillator 객체(osc) 생성 및 유형 설정
+  osc.freq(440);					// 오실레이터의 초기 주파수 설정(440Hz)
+  osc.amp(env);				// 오실레이터의 진폭 설정 시 포락선 적용
+  osc.start();					// 오실레이터 시작
+
+  attack_time = slider('Attack time', 0, maxTime, attackTime, 0, height+10);
+  attack_level = slider('Attack level', 0, maxLevel, attackLevel, 0, height+30);
+  decay_time = slider('Decay time', 0, maxTime, decayTime, 0, height+50);
+  sustain_time = slider('Sustain time', 0, maxTime, sustainTime, 0, height+70);
+  sustain_level = slider('Sustain level', 0, 1, sustainLevel, 0, height+90);
+  release_time = slider('Release time', 0, maxTime, releaseTime, 0, height+110);
+  release_level = slider('Release level', 0, maxLevel, 0, 0, height+130);
+}
+
+function draw() {
+  background(200);
+  textAlign(CENTER, CENTER);
+  text('임의의 키를 눌러 주세요 (주파수: ' + osc.f + 'Hz)', width/2, height/2);
+
+  attackTime = attack_time.value();	// 슬라이더('Attack time')의 값 읽기
+  attackLevel = attack_level.value();	// 슬라이더('Attack level')의 값 읽기
+  decayTime = decay_time.value();	// 슬라이더('Decay time')의 값 읽기
+  sustainTime = sustain_time.value();	// 슬라이더('Sustain time')의 값 읽기
+  sustainLevel = sustain_level.value();	// 슬라이더('Sustain level')의 값 읽기
+  releaseTime = release_time.value();	// 슬라이더('Release time')의 값 읽기
+  releaseLevel = release_level.value();	// 슬라이더('Release level')의 값 읽기
+  drawADSR();				// ADSR 포락선 그리기
+}
+
+function keyPressed() {			// 이벤트함수: 읽은 슬라이더 값으로 포락선 설정
+  if (key === 'f') {			// ‘f’키를 누른 경우
+    osc.freq(int(random(200, 500)));	// 오실레이터의 주파수(200∼500Hz) 랜덤 설정
+  } else if (key === ' ') {		// 스페이스키를 누른 경우
+    env.set(attackTime, attackLevel, decayTime, sustainLevel, releaseTime, releaseLevel);
+    env.play(osc, 0, sustainTime);	// ADSR 포락선 음원의 재생
+  }
+}
+
+function slider(labelText, minVal, maxVal, initVal, xpos, ypos) {	// 함수 유형4
+  let label = createDiv(labelText);  	// 브라우저 화면에서 텍스트 출력
+  label.position(xpos, ypos);
+  let mySlider = createSlider(minVal, maxVal, initVal, 0);	// 스텝(step)이 0이면 연속
+  mySlider.size(300);						// 슬라이더 크기 설정
+  mySlider.position(xpos+100, ypos);				// 슬라이더 위치 설정
+  return mySlider;			// p5.Element 객체 반환(→[질문5.16] 설명 참조)
+}
+
+function drawADSR() {			// ADSR 포락선 그리기
+  let x, y;
+  let xScale = width / maxTime / 4;
+  let yScale = height / maxLevel;
+  
+  noStroke();
+  fill(0);					// 꼭지점 연결 도형 채움 색상: 검정색
+  textAlign(LEFT, BOTTOM);		// 텍스트 정렬
+  beginShape();				// ADSR 포락선 그리기 시작
+
+  // 시작점
+  vertex(0, height);
+  
+  // Attack
+  x = attackTime * xScale;
+  y = height - (attackLevel * yScale);
+  vertex(x, y);				// x:시간축, y:진폭축
+  text('Attack', x, y);
+  
+  // Decay
+  x = x + (decayTime * xScale);	// x시간축: A→D 순으로 시간 누적
+  y = height - (releaseLevel + sustainLevel * (attackLevel - releaseLevel)) * yScale;
+  vertex(x, y);				// x:시간축, y:진폭축
+  text('Decay', x, y);
+  
+  // Sustain
+  x = x + (sustainTime * xScale);	// x시간축: A→D→S 순으로 시간 누적
+  y = y;
+  vertex(x, y);				// x:시간축, y:진폭축
+  text('Sustain', x, y);
+  
+  // Release
+  x = x + (releaseTime * xScale);	// x시간축: A→D→S→R 순으로 시간 누적
+  y = height - (releaseLevel * yScale);
+  vertex(x, y);				// x:시간축, y:진폭축
+  text('Release', x, y);
+  
+  // 끝점
+  vertex(width, y);
+  vertex(width, height);
+  endShape();				// ADSR 포락선 그리기 종료
+}

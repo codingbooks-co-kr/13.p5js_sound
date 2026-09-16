@@ -1,0 +1,47 @@
+// 마우스의 상하 움직임에 따라 옥타브가 변하고, 캔버스를 누르면 해당 옥타브의 음계 순차 재생
+
+let monoSynth, soundLoop, octave, midiNum = 0, index = 0;
+let sclaes = [60, 62, 64, 65, 67, 69, 71];	// 미디번호배열(C장조음계)
+
+function setup() {
+  let canvas = createCanvas(500, 200);
+  canvas.mousePressed(canvasPressed);	// 캔버스를 누를 때 canvasPressed() 호출
+  
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  soundLoop = new p5.SoundLoop(onSoundLoop, 0.5);	// 0.5초마다 콜백함수 호출
+}
+
+function draw() {
+  background(0);
+  let y = constrain(mouseY, 50, height);
+  octave = int(map(y, 50, height, 5, 3));	// 변환된 옥타브 범위: 3∼5
+  
+  stroke(255);
+  line(0, y, width, y);				// 마우스의 상하 움직임을 따라오는 선
+  
+  noStroke();
+  fill(255);
+  textSize(20);
+  text('옥타브:' + octave, 20, y-10);
+}
+
+function canvasPressed() {			// 콜백함수
+  if (soundLoop.isPlaying) {			// 사운드처리 콜백함수의 호출이 있으면 true
+    soundLoop.pause();				// 사운드처리 콜백함수의 호출 일시정지
+  } else {
+    soundLoop.start();				// 사운드처리 콜백함수를 반복 호출 시작
+  }
+}
+
+function onSoundLoop(time) {			// 콜백함수
+  if (octave === 3) {				// 3옥타브일 경우
+    midiNum = sclaes[index] - 12;
+  } else if (octave === 4) {			// 4옥타브일 경우
+    midiNum = sclaes[index];
+  } else if (octave === 5) {			// 5옥타브일 경우
+    midiNum = sclaes[index] + 12;
+  }
+  let myFreq = midiToFreq(midiNum);		// 미디번호를 주파수로 변환
+  monoSynth.play(myFreq, 1, time, 0.3);	// 음 재생
+  index = (index + 1) % sclaes.length;	// index = 0∼6 순으로 반복
+}

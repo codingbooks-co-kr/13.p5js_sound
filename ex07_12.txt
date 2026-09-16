@@ -1,0 +1,19 @@
+// SoundLoop를 사용한 메트로놈
+
+let monoSynth, soundLoop, bpm = 60;
+
+function setup() {
+  createCanvas(500, 200);
+  monoSynth = new p5.MonoSynth();		// p5.MonoSynth 객체(monoSynth) 생성 
+  soundLoop = new p5.SoundLoop(onSoundLoop, 60/bpm);	// 1초마다 콜백함수 호출
+  soundLoop.start();				// 사운드처리 콜백함수를 반복 호출 시작
+  
+  textAlign(CENTER, CENTER);
+  textSize(30);
+}
+
+function onSoundLoop(time) {			// 콜백함수
+  background(random(255), random(255), random(255));
+  text('메트로놈 구현', width/2, height/2);
+  monoSynth.play(440, 1, time, 0.3);
+}
